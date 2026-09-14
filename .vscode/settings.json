@@ -5,6 +5,7 @@
   "explorer.openEditors.visible": 1,
   "editor.insertSpaces": false,
   "slint.libraryPaths": {
-    
+    "styles": "./ui/styles/index.slint",
+    "components": "./ui/components",
   }
 }

@@ -1,0 +1,402 @@
+export global Style {
+	// Font size
+	out property <length> text-xs:   12px;
+	out property <length> text-sm:   14px;
+	out property <length> text-base: 16px;
+	out property <length> text-lg:   18px;
+	out property <length> text-xl:   20px;
+	out property <length> text-2xl:  24px;
+	out property <length> text-3xl:  30px;
+	out property <length> text-4xl:  36px;
+	out property <length> text-5xl:  48px;
+	out property <length> text-6xl:  60px;
+	out property <length> text-7xl:  72px;
+	out property <length> text-8xl:  96px;
+	out property <length> text-9xl: 128px;
+
+	// Font weight
+	out property <int> font-thin:       100;
+	out property <int> font-extralight: 200;
+	out property <int> font-light:      300;
+	out property <int> font-normal:     400;
+	out property <int> font-medium:     500;
+	out property <int> font-semibold:   600;
+	out property <int> font-bold:       700;
+	out property <int> font-extrabold:  800;
+	out property <int> font-black:      900;
+
+	// Font family
+	// These are tokens rather than exact Tailwind CSS stacks.
+	// Slint expects a font family name available on the system.
+	out property <string> font-sans: "Inter";
+	out property <string> font-serif: "Georgia";
+	out property <string> font-mono: "JetBrains Mono";
+
+	// Font style
+	out property <bool> italic: true;
+
+	// Spacing
+	out property <length> space-0:   0px;
+	out property <length> space-px:  1px;
+	out property <length> space-0_5: 2px;
+	out property <length> space-1:   4px;
+	out property <length> space-1_5: 6px;
+	out property <length> space-2:   8px;
+	out property <length> space-2_5: 10px;
+	out property <length> space-3:   12px;
+	out property <length> space-3_5: 14px;
+	out property <length> space-4:   16px;
+	out property <length> space-5:   20px;
+	out property <length> space-6:   24px;
+	out property <length> space-7:   28px;
+	out property <length> space-8:   32px;
+	out property <length> space-9:   36px;
+	out property <length> space-10:  40px;
+	out property <length> space-11:  44px;
+	out property <length> space-12:  48px;
+	out property <length> space-14:  56px;
+	out property <length> space-16:  64px;
+	out property <length> space-20:  80px;
+	out property <length> space-24:  96px;
+	out property <length> space-28: 112px;
+	out property <length> space-32: 128px;
+	out property <length> space-36: 144px;
+	out property <length> space-40: 160px;
+	out property <length> space-44: 176px;
+	out property <length> space-48: 192px;
+	out property <length> space-52: 208px;
+	out property <length> space-56: 224px;
+	out property <length> space-60: 240px;
+	out property <length> space-64: 256px;
+	out property <length> space-72: 288px;
+	out property <length> space-80: 320px;
+	out property <length> space-96: 384px;
+
+	// Border radius
+	// out property <length> rounded-none: 0px;
+	// out property <length> rounded-xs:   2px;
+	// out property <length> rounded-sm:   4px;
+	// out property <length> rounded-md:   6px;
+	// out property <length> rounded-lg:   8px;
+	// out property <length> rounded-xl:   12px;
+	// out property <length> rounded-2xl:  16px;
+	// out property <length> rounded-3xl:  24px;
+	// out property <length> rounded-4xl:  32px;
+
+	// "rounded-full" isn't a fixed radius in Tailwind.
+	// For most Slint components, a large value gives the same
+	// pill/circle effect.
+	// out property <length> rounded-full: 9999px;
+
+
+	// Border width
+	// out property <length> border-0: 0px;
+	// out property <length> border:   1px;
+	// out property <length> border-2: 2px;
+	// out property <length> border-4: 4px;
+	// out property <length> border-8: 8px;
+
+
+	// Scale/Opacity
+	// Slint uses 0.0 -> 1.0
+	// Tailwind uses percentages.
+	out property <float> scale-0:    0.0;
+	out property <float> scale-5:    0.05;
+	out property <float> scale-10:   0.10;
+	out property <float> scale-15:   0.15;
+	out property <float> scale-20:   0.20;
+	out property <float> scale-25:   0.25;
+	out property <float> scale-30:   0.30;
+	out property <float> scale-35:   0.35;
+	out property <float> scale-40:   0.40;
+	out property <float> scale-45:   0.45;
+	out property <float> scale-50:   0.50;
+	out property <float> scale-55:   0.55;
+	out property <float> scale-60:   0.60;
+	out property <float> scale-65:   0.65;
+	out property <float> scale-70:   0.70;
+	out property <float> scale-75:   0.75;
+	out property <float> scale-80:   0.80;
+	out property <float> scale-85:   0.85;
+	out property <float> scale-90:   0.90;
+	out property <float> scale-95:   0.95;
+	out property <float> scale-100:  1.00;
+
+
+	// Height/width
+	out property <length> size-px:  1px;
+	out property <length> size-0:   0px;
+	out property <length> size-1:   4px;
+	out property <length> size-2:   8px;
+	out property <length> size-3:   12px;
+	out property <length> size-4:   16px;
+	out property <length> size-5:   20px;
+	out property <length> size-6:   24px;
+	out property <length> size-8:   32px;
+	out property <length> size-10:  40px;
+	out property <length> size-12:  48px;
+	out property <length> size-16:  64px;
+	out property <length> size-20:  80px;
+	out property <length> size-24:  96px;
+	out property <length> size-32: 128px;
+	out property <length> size-40: 160px;
+	out property <length> size-48: 192px;
+	out property <length> size-56: 224px;
+	out property <length> size-64: 256px;
+
+
+	// Colors
+	// Tailwind's semantic palette is huge. For an app theme,
+	// these aliases are generally more useful than copying every
+	// single red-50 ... red-950 token.
+	out property <color> white: #ffffff;
+	out property <color> black: #000000;
+
+	// Slate
+	out property <color> slate-50:  #f8fafc;
+	out property <color> slate-100: #f1f5f9;
+	out property <color> slate-200: #e2e8f0;
+	out property <color> slate-300: #cbd5e1;
+	out property <color> slate-400: #94a3b8;
+	out property <color> slate-500: #64748b;
+	out property <color> slate-600: #475569;
+	out property <color> slate-700: #334155;
+	out property <color> slate-800: #1e293b;
+	out property <color> slate-900: #0f172a;
+	out property <color> slate-950: #020617;
+
+	// Gray
+	out property <color> gray-50:  #f9fafb;
+	out property <color> gray-100: #f3f4f6;
+	out property <color> gray-200: #e5e7eb;
+	out property <color> gray-300: #d1d5db;
+	out property <color> gray-400: #9ca3af;
+	out property <color> gray-500: #6b7280;
+	out property <color> gray-600: #4b5563;
+	out property <color> gray-700: #374151;
+	out property <color> gray-800: #1f2937;
+	out property <color> gray-900: #111827;
+	out property <color> gray-950: #030712;
+
+	// Zinc
+	out property <color> zinc-50:  #fafafa;
+	out property <color> zinc-100: #f4f4f5;
+	out property <color> zinc-200: #e4e4e7;
+	out property <color> zinc-300: #d4d4d8;
+	out property <color> zinc-400: #a1a1aa;
+	out property <color> zinc-500: #71717a;
+	out property <color> zinc-600: #52525b;
+	out property <color> zinc-700: #3f3f46;
+	out property <color> zinc-800: #27272a;
+	out property <color> zinc-900: #18181b;
+	out property <color> zinc-950: #09090b;
+
+	// Neutral
+	out property <color> neutral-50:  #fafafa;
+	out property <color> neutral-100: #f5f5f5;
+	out property <color> neutral-200: #e5e5e5;
+	out property <color> neutral-300: #d4d4d4;
+	out property <color> neutral-400: #a3a3a3;
+	out property <color> neutral-500: #737373;
+	out property <color> neutral-600: #525252;
+	out property <color> neutral-700: #404040;
+	out property <color> neutral-800: #262626;
+	out property <color> neutral-900: #171717;
+	out property <color> neutral-950: #0a0a0a;
+
+	// Red
+	out property <color> red-50:  #fef2f2;
+	out property <color> red-100: #fee2e2;
+	out property <color> red-200: #fecaca;
+	out property <color> red-300: #fca5a5;
+	out property <color> red-400: #f87171;
+	out property <color> red-500: #ef4444;
+	out property <color> red-600: #dc2626;
+	out property <color> red-700: #b91c1c;
+	out property <color> red-800: #991b1b;
+	out property <color> red-900: #7f1d1d;
+	out property <color> red-950: #450a0a;
+
+	// Orange
+	out property <color> orange-50:  #fff7ed;
+	out property <color> orange-100: #ffedd5;
+	out property <color> orange-200: #fed7aa;
+	out property <color> orange-300: #fdba74;
+	out property <color> orange-400: #fb923c;
+	out property <color> orange-500: #f97316;
+	out property <color> orange-600: #ea580c;
+	out property <color> orange-700: #c2410c;
+	out property <color> orange-800: #9a3412;
+	out property <color> orange-900: #7c2d12;
+	out property <color> orange-950: #431407;
+
+	// Amber
+	out property <color> amber-50:  #fffbeb;
+	out property <color> amber-100: #fef3c7;
+	out property <color> amber-200: #fde68a;
+	out property <color> amber-300: #fcd34d;
+	out property <color> amber-400: #fbbf24;
+	out property <color> amber-500: #f59e0b;
+	out property <color> amber-600: #d97706;
+	out property <color> amber-700: #b45309;
+	out property <color> amber-800: #92400e;
+	out property <color> amber-900: #78350f;
+	out property <color> amber-950: #451a03;
+
+	// Yellow
+	out property <color> yellow-50:  #fefce8;
+	out property <color> yellow-100: #fef9c3;
+	out property <color> yellow-200: #fef08a;
+	out property <color> yellow-300: #fde047;
+	out property <color> yellow-400: #facc15;
+	out property <color> yellow-500: #eab308;
+	out property <color> yellow-600: #ca8a04;
+	out property <color> yellow-700: #a16207;
+	out property <color> yellow-800: #854d0e;
+	out property <color> yellow-900: #713f12;
+	out property <color> yellow-950: #422006;
+
+	// Green
+	out property <color> green-50:  #f0fdf4;
+	out property <color> green-100: #dcfce7;
+	out property <color> green-200: #bbf7d0;
+	out property <color> green-300: #86efac;
+	out property <color> green-400: #4ade80;
+	out property <color> green-500: #22c55e;
+	out property <color> green-600: #16a34a;
+	out property <color> green-700: #15803d;
+	out property <color> green-800: #166534;
+	out property <color> green-900: #14532d;
+	out property <color> green-950: #052e16;
+
+	// Blue
+	out property <color> blue-50:  #eff6ff;
+	out property <color> blue-100: #dbeafe;
+	out property <color> blue-200: #bfdbfe;
+	out property <color> blue-300: #93c5fd;
+	out property <color> blue-400: #60a5fa;
+	out property <color> blue-500: #3b82f6;
+	out property <color> blue-600: #2563eb;
+	out property <color> blue-700: #1d4ed8;
+	out property <color> blue-800: #1e40af;
+	out property <color> blue-900: #1e3a8a;
+	out property <color> blue-950: #172554;
+
+	// Purple
+	out property <color> purple-50:  #faf5ff;
+	out property <color> purple-100: #f3e8ff;
+	out property <color> purple-200: #e9d5ff;
+	out property <color> purple-300: #d8b4fe;
+	out property <color> purple-400: #c084fc;
+	out property <color> purple-500: #a855f7;
+	out property <color> purple-600: #9333ea;
+	out property <color> purple-700: #7e22ce;
+	out property <color> purple-800: #6b21a8;
+	out property <color> purple-900: #581c87;
+	out property <color> purple-950: #3b0764;
+
+	// Pink
+	out property <color> pink-50:  #fdf2f8;
+	out property <color> pink-100: #fce7f3;
+	out property <color> pink-200: #fbcfe8;
+	out property <color> pink-300: #f9a8d4;
+	out property <color> pink-400: #f472b6;
+	out property <color> pink-500: #ec4899;
+	out property <color> pink-600: #db2777;
+	out property <color> pink-700: #be185d;
+	out property <color> pink-800: #9d174d;
+	out property <color> pink-900: #831843;
+	out property <color> pink-950: #500724;
+
+	// Shadows
+	//
+	// Slint doesn't have CSS box-shadow as one token, but it has
+	// the equivalent drop-shadow properties:
+	//
+	// offset-x
+	// offset-y
+	// blur
+	// spread
+	// color
+	//
+	// So these are represented as individual tokens.
+
+	// Small
+	out property <length> shadow-sm-x: 0px;
+	out property <length> shadow-sm-y: 1px;
+	out property <length> shadow-sm-blur: 3px;
+	out property <length> shadow-sm-spread: 0px;
+	out property <color> shadow-sm-color: #0000001a;
+
+	// Medium
+	out property <length> shadow-md-x: 0px;
+	out property <length> shadow-md-y: 4px;
+	out property <length> shadow-md-blur: 6px;
+	out property <length> shadow-md-spread: -1px;
+	out property <color> shadow-md-color: #0000001a;
+
+	// Large
+	out property <length> shadow-lg-x: 0px;
+	out property <length> shadow-lg-y: 10px;
+	out property <length> shadow-lg-blur: 15px;
+	out property <length> shadow-lg-spread: -3px;
+	out property <color> shadow-lg-color: #0000001a;
+
+	// Extra large
+	out property <length> shadow-xl-x: 0px;
+	out property <length> shadow-xl-y: 20px;
+	out property <length> shadow-xl-blur: 25px;
+	out property <length> shadow-xl-spread: -5px;
+	out property <color> shadow-xl-color: #0000001a;
+
+	// 2XL
+	out property <length> shadow-2xl-x: 0px;
+	out property <length> shadow-2xl-y: 25px;
+	out property <length> shadow-2xl-blur: 50px;
+	out property <length> shadow-2xl-spread: -12px;
+	out property <color> shadow-2xl-color: #00000040;
+
+	// None
+	out property <length> shadow-none-x: 0px;
+	out property <length> shadow-none-y: 0px;
+	out property <length> shadow-none-blur: 0px;
+	out property <length> shadow-none-spread: 0px;
+	out property <color> shadow-none-color: transparent;
+
+	// Gaps
+	// out property <length> gap-0:  0px;
+	// out property <length> gap-1:  4px;
+	// out property <length> gap-2:  8px;
+	// out property <length> gap-3:  12px;
+	// out property <length> gap-4:  16px;
+	// out property <length> gap-5:  20px;
+	// out property <length> gap-6:  24px;
+	// out property <length> gap-8:  32px;
+	// out property <length> gap-10: 40px;
+	// out property <length> gap-12: 48px;
+
+	// Padding
+	// out property <length> p-0: 0px;
+	// out property <length> p-1: 4px;
+	// out property <length> p-2: 8px;
+	// out property <length> p-3: 12px;
+	// out property <length> p-4: 16px;
+	// out property <length> p-5: 20px;
+	// out property <length> p-6: 24px;
+	// out property <length> p-8: 32px;
+	// out property <length> p-10: 40px;
+	// out property <length> p-12: 48px;
+
+
+	// Margin
+	// out property <length> m-0: 0px;
+	// out property <length> m-1: 4px;
+	// out property <length> m-2: 8px;
+	// out property <length> m-3: 12px;
+	// out property <length> m-4: 16px;
+	// out property <length> m-5: 20px;
+	// out property <length> m-6: 24px;
+	// out property <length> m-8: 32px;
+	// out property <length> m-10: 40px;
+	// out property <length> m-12: 48px;
+}
