@@ -29,6 +29,8 @@ struct ThemePalette {
 }
 
 export global Theme {
+	in-out property <int> selected-index: 1;
+	out property <ThemePalette> palette: list[selected-index];
 	out property <[ThemePalette]> list: [
 		{
 			name: "light",

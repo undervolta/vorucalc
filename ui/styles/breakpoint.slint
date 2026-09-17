@@ -1,0 +1,16 @@
+export global Breakpoint {
+	out property <length> sm: 640px;
+	out property <length> md: 768px;
+	out property <length> lg: 1024px;
+	out property <length> xl: 1280px;
+	out property <length> xxl: 1440px;
+
+	public pure function get-breakpoint(width: length) -> string {
+		return width >= xxl ? "xxl"
+			: width >= xl  ? "xl"
+			: width >= lg  ? "lg"
+			: width >= md  ? "md"
+			: width >= sm  ? "sm"
+			: "xs";
+	}
+}
