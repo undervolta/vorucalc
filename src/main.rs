@@ -3,8 +3,6 @@
 
 use std::error::Error;
 
-use slint::platform::WindowEvent;
-
 slint::include_modules!();
 
 fn main() -> Result<(), Box<dyn Error>> {

@@ -1,8 +1,9 @@
 import { Button, VerticalBox } from "std-widgets.slint";
 import { TabsGroup } from "@components/tabs.slint";
-import { Breakpoint, Style, Theme } from "@styles";
+import { Style, Theme } from "@styles";
 
 import "./fonts/poppins.medium.ttf";
+import { Breakpoint } from "styles/breakpoint.slint";
 
 export component AppWindow inherits Window {
 	preferred-width: 300px;
@@ -11,7 +12,7 @@ export component AppWindow inherits Window {
 	default-font-size: Style.text-base;
 
 	in-out property <int> counter: 42;
-	out property <string> screen: "?";
+	out property <string> screen: Breakpoint.get-breakpoint(self.width);
 
 	callback request-increase-value();
 	callback decrease-by(int);
@@ -22,18 +23,15 @@ export component AppWindow inherits Window {
 		}
 
 		Button {
-			text: "Increase value \{root.screen}";
+			text: "Increase value";
 			clicked => {
 				root.request-increase-value();
-				root.screen = Breakpoint.get-breakpoint(root.width);
 				Theme.selected-index = Theme.selected-index == 1 ? 0 : 1;
 			}
 		}
+		Rectangle {
+			background: screen == "xs" ? red : blue;
+		}
 		TabsGroup {}
 	}
-	
-	// Rectangle {
-	// 	background: Theme.list[0].color-base-100;
-	// 	height: 60px;
-	// }
 }
