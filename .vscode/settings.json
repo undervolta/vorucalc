@@ -7,5 +7,6 @@
   "slint.libraryPaths": {
     "styles": "./ui/styles/index.slint",
     "components": "./ui/components",
+    "stores": "./ui/stores",
   }
 }

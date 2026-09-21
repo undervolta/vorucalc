@@ -3,6 +3,7 @@ fn main() {
     let library_paths = std::collections::HashMap::from([
         ("styles".to_string(), manifest_dir.join("ui/styles/index.slint")),
         ("components".to_string(), manifest_dir.join("ui/components")),
+        ("stores".to_string(), manifest_dir.join("ui/stores")),
     ]);
     let config = slint_build::CompilerConfiguration::new()
         .with_library_paths(library_paths);

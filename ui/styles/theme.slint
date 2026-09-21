@@ -1,4 +1,4 @@
-struct ThemePalette {
+export struct ThemePalette {
 	name: string,
 	color-base-100: color,
 	color-base-200: color,
@@ -29,8 +29,7 @@ struct ThemePalette {
 }
 
 export global Theme {
-	in-out property <int> selected-index: 1;
-	out property <ThemePalette> palette: list[selected-index];
+	
 	out property <[ThemePalette]> list: [
 		{
 			name: "light",

@@ -1,19 +1,86 @@
 import { Style, Theme } from "@styles";
+import { 
+	AppState, AppLogic,
+	TabsState, TabsType
+} from "@stores/app.slint";
 
-export component TabsGroup {
-	height: 24px;
+export component Tabs inherits Rectangle {
+	in property <int> id;
+	in property <string> parent_id;
+	in property <string> label;
+	in property <image> icon;
+	in-out property <bool> is-active;
+
+	min-width: 0px;
+    preferred-width: 0px;
+
+	HorizontalLayout {
+		spacing: 8px;
+		alignment: center;
+		cross-axis-alignment: center;
+		
+		if (icon.width > 0): Image {
+			source: icon;
+			colorize: is-active ? AppState.palette.color-primary-content : AppState.palette.color-base-content;
+			width: 14px;
+
+			animate colorize {
+				duration: 300ms;
+				easing: ease-out-quint;
+			}
+		}
+	
+		if (AppState.screen-width > 400px): Text {
+			text: label;
+			color: is-active ? AppState.palette.color-primary-content : AppState.palette.color-base-content;
+
+			animate color {
+				duration: 300ms;
+				easing: ease-out-quint;
+			}
+		}
+	}
+	
+	TouchArea {
+		clicked => {
+			AppLogic.select-tab(parent_id, id);
+		}
+	}
+}
+
+export component TabsGroup inherits Rectangle {
+	in property <string> id;
+	in-out property <TabsState> state;
+	// in property <string> size: "md";
+
+	height: 36px;
 
 	Rectangle {
-		border-radius: Theme.palette.radius-field;
-		background: Theme.palette.color-base-200;
+		border-radius: AppState.palette.radius-field;
+		background: AppState.palette.color-base-200;
 
 		Rectangle {
-			// background: blue;
-			// width: parent.width/3;
+			x: ((state.selected - 1) * (parent.width / 3)) + 3px;
+			y: 3px;
+			width: parent.width / 3 - 6px;
+			height: parent.height - 6px;
+			background: AppState.palette.color-primary;
+			border-radius: AppState.palette.radius-field;
+
+			animate x {
+				duration: 300ms;
+				easing: ease-out-quint;
+			}
 		}
 
-		Text {
-			text: "ABC";
+		HorizontalLayout {
+			for tab[idx] in state.tabs: Tabs {
+				id: idx;
+				parent_id: id;
+				label: tab.label;
+				icon: AppLogic.load-image(tab.icon);
+				is-active: state.selected - 1 == idx;
+			}
 		}
 	}
 }

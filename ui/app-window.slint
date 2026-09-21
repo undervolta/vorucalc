@@ -1,37 +1,50 @@
 import { Button, VerticalBox } from "std-widgets.slint";
-import { TabsGroup } from "@components/tabs.slint";
-import { Style, Theme } from "@styles";
+import { TabsGroup, Tabs } from "@components/tabs.slint";
+import { Style, Theme, Breakpoint } from "@styles";
+import { AppState, TabsState } from "@stores/app.slint";
 
 import "./fonts/poppins.medium.ttf";
-import { Breakpoint } from "styles/breakpoint.slint";
+
+export { AppState, AppLogic } from "@stores/app.slint";
 
 export component AppWindow inherits Window {
 	preferred-width: 300px;
 	preferred-height: 400px;
 	default-font-family: "Poppins";
 	default-font-size: Style.text-base;
-
+	
+	in-out property <[TabsState]> tabs;
+	in-out property <string> active-tabs: "calc";
 	in-out property <int> counter: 42;
-	out property <string> screen: Breakpoint.get-breakpoint(self.width);
 
 	callback request-increase-value();
-	callback decrease-by(int);
 	
 	VerticalBox {
-		Text {
+		if (active-tabs == "calc"): Text {
 			text: "Counter: \{root.counter} X";
 		}
-
-		Button {
+		if (active-tabs == "var"): Button {
 			text: "Increase value";
 			clicked => {
 				root.request-increase-value();
-				Theme.selected-index = Theme.selected-index == 1 ? 0 : 1;
+				AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
 			}
 		}
-		Rectangle {
-			background: screen == "xs" ? red : blue;
+		if (active-tabs == "stg"): Rectangle {
+			background: AppState.screen-width > 400px ? red : blue;
+			preferred-height: 300px;
 		}
-		TabsGroup {}
+
+		TabsGroup {
+			id: "main-nav";
+			state: tabs[0];
+			// size: "sm";
+		}
 	}
+
+	changed width => {
+		AppState.screen-width = self.width;
+		AppState.screen = Breakpoint.get-breakpoint(self.width);
+	}
+	
 }

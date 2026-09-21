@@ -11,6 +11,13 @@ slint = "1.16.1"
 [build-dependencies]
 slint-build = "1.16.1"
 
+[build]
+rustflags = ["-Z", "threads=8"]
+
+[profile.dev]
+debug = "line-tables-only"
+# codegen-backend = "cranelift"
+
 [profile.release]
 codegen-units = 1
 lto = true

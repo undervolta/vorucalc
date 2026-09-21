@@ -1,0 +1,26 @@
+import { Theme, ThemePalette } from "@styles";
+
+export struct TabsType {
+	name: string,
+	label: string,
+	icon: string,
+	is-active: bool
+}
+
+export struct TabsState {
+	id: string,
+	selected: int,
+	tabs: [TabsType]
+}
+
+export global AppState {
+	in-out property <int> selected-theme: 1;	// index
+	out property <ThemePalette> palette: Theme.list[selected-theme];
+	in property <string> screen;
+	in property <length> screen-width;
+}
+
+export global AppLogic {
+	pure callback load-image(string) -> image;	// (path)
+	callback select-tab(string, int);			// (id, selected)
+}

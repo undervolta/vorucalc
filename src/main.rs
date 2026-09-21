@@ -1,21 +1,59 @@
 // Prevent console window in addition to Slint window in Windows release builds when, e.g., starting the app via file manager. Ignored on other platforms.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::error::Error;
+use std::{
+	error::Error,
+	path::{ PathBuf }
+};
+use slint::{ Image, Model };
 
 slint::include_modules!();
 
-fn main() -> Result<(), Box<dyn Error>> {
-	let ui = AppWindow::new()?;
+mod components;
 
-	let ui_handle = ui.as_weak();
-	
-	ui.on_request_increase_value(move || {
-		let ui = ui_handle.unwrap();
-		ui.set_counter(ui.get_counter() + 1);
+fn main() -> Result<(), Box<dyn Error>> {
+	let app = AppWindow::new()?;
+	// let state = app.global::<AppState>();
+	let logic = app.global::<AppLogic>();
+
+	let tabs = components::tabs::get_app_tabs();
+
+	app.set_tabs(tabs.clone());
+
+
+	let app_handle_1 = app.as_weak();
+	app.on_request_increase_value(move || {
+		if let Some(ui) = app_handle_1.upgrade() {
+			ui.set_counter(ui.get_counter() + 1);
+		}
 	});
 
-	ui.run()?;
+	let app_handle_2 = app.as_weak();
+	logic.on_load_image(move |path| {
+		if let Some(_) = app_handle_2.upgrade() {
+			let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
+			let img_path = &manifest_dir.join("ui/icons").join(path.as_str());
+
+			Image::load_from_path(img_path)
+				.unwrap_or_else(|_| Image::default())
+		}
+		else {
+			Image::default()
+		}
+	});
+
+	let app_handle_3 = app.as_weak();
+	logic.on_select_tab(move |id, selected| {
+		if let Some(ui) = app_handle_3.upgrade() {
+			if let Some((idx, mut tab_group)) = tabs.iter().enumerate().find(|(_, tg)| tg.id == id) {
+				tab_group.selected = selected + 1;
+				ui.set_active_tabs(tab_group.tabs.row_data(selected as usize).unwrap().name);
+				tabs.set_row_data(idx, tab_group);
+			}
+		}
+	});
+
+	app.run()?;
 
 	Ok(())
 }
