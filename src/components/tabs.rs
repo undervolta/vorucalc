@@ -13,20 +13,30 @@ pub fn get_app_tabs() -> ModelRc<TabsState> {
 					name: "calc".into(),
 					label: "Calculate".into(),
 					icon: "calc.svg".into(),
-					is_active: true
+					is_active: true,
+					width: 0.0
 				},
 				TabsType {
 					name: "var".into(),
 					label: "Variable".into(),
 					icon: "var.svg".into(),
-					is_active: false
+					is_active: false,
+					width: 0.0
 				},
 				TabsType {
-					name: "stg".into(),
-					label: "Settings".into(),
-					icon: "cog.svg".into(),
-					is_active: false
+					name: "note".into(),
+					label: "Notes".into(),
+					icon: "notebook.svg".into(),
+					is_active: false,
+					width: 0.0
 				},
+				// TabsType {
+				// 	name: "stg".into(),
+				// 	label: "".into(),
+				// 	icon: "cog.svg".into(),
+				// 	is_active: false,
+				// 	width: 14.0
+				// },
 			])))
 		}
 	])))

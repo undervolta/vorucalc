@@ -10,9 +10,10 @@ export component Tabs inherits Rectangle {
 	in property <string> label;
 	in property <image> icon;
 	in-out property <bool> is-active;
+	in property <length> pref-width;
 
-	min-width: 0px;
-    preferred-width: 0px;
+	min-width: pref-width;
+    preferred-width: pref-width;
 
 	HorizontalLayout {
 		spacing: 8px;
@@ -58,11 +59,14 @@ export component TabsGroup inherits Rectangle {
 	Rectangle {
 		border-radius: AppState.palette.radius-field;
 		background: AppState.palette.color-base-200;
+		drop-shadow-color: AppState.palette.color-neutral.transparentize(0.5);
+		drop-shadow-blur: 1px;
+		drop-shadow-offset-y: 2px;
 
 		Rectangle {
-			x: ((state.selected - 1) * (parent.width / 3)) + 3px;
+			x: ((state.selected - 1) * (parent.width / state.tabs.length)) + 3px;
 			y: 3px;
-			width: parent.width / 3 - 6px;
+			width: parent.width / state.tabs.length - 6px;
 			height: parent.height - 6px;
 			background: AppState.palette.color-primary;
 			border-radius: AppState.palette.radius-field;
@@ -80,7 +84,13 @@ export component TabsGroup inherits Rectangle {
 				label: tab.label;
 				icon: AppLogic.load-image(tab.icon);
 				is-active: state.selected - 1 == idx;
+				pref-width: tab.width;
 			}
+		}
+
+		animate background {
+			duration: 300ms;
+			easing: ease-out-quint;
 		}
 	}
 }

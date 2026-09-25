@@ -1,0 +1,78 @@
+import { AppState } from "@stores/app.slint";
+
+export component Button {
+	in property <string> text;
+	in property <string> type;
+	in property <image> icon;
+	in property <brush> color;
+	in property <brush> bg-color;
+	in property <length> padding-x;
+	in property <bool> default-padding-x: true;
+	callback clicked();
+
+	Rectangle {
+		border-radius: AppState.palette.radius-box;
+		background: (bg-color != transparent ? bg-color 
+			: type == "primary" ? AppState.palette.color-secondary
+			: type == "secondary" ? AppState.palette.color-secondary
+			: type == "accent" ? AppState.palette.color-accent
+			: type == "info" ? AppState.palette.color-info
+			: type == "success" ? AppState.palette.color-success
+			: type == "warning" ? AppState.palette.color-warning
+			: type == "error" ? AppState.palette.color-error
+			: AppState.palette.color-neutral)
+			.mix(AppState.palette.color-primary, ta.has-hover ? 0.7 : 1)
+			.darker(ta.pressed ? 0 : 0.4);
+		
+		drop-shadow-color: AppState.palette.color-neutral.transparentize(0.5);
+		drop-shadow-blur: 1px;
+		drop-shadow-offset-y: 2px;
+
+		HorizontalLayout {
+			spacing: 8px;
+			padding: AppState.palette.radius-box;
+			padding-left: padding-x > 0px ? padding-x : default-padding-x ? AppState.palette.radius-box * 3 : AppState.palette.radius-box;
+			padding-right: padding-x > 0px ? padding-x : default-padding-x ? AppState.palette.radius-box * 3 : AppState.palette.radius-box;
+			alignment: center;
+			cross-axis-alignment: center;
+	
+			if (icon.width > 0): Image {
+				source: icon;
+				width: 14px;
+				colorize: color != transparent ? color
+					: type == "primary" ? AppState.palette.color-secondary-content
+					: type == "secondary" ? AppState.palette.color-secondary-content
+					: type == "accent" ? AppState.palette.color-accent-content
+					: type == "info" ? AppState.palette.color-info-content
+					: type == "success" ? AppState.palette.color-success-content
+					: type == "warning" ? AppState.palette.color-warning-content
+					: type == "error" ? AppState.palette.color-error-content
+					: AppState.palette.color-neutral-content;
+			}
+	
+			if (text != ""): Text {
+				text: text;
+				color: color != transparent ? color
+					: type == "primary" ? AppState.palette.color-secondary-content
+					: type == "secondary" ? AppState.palette.color-secondary-content
+					: type == "accent" ? AppState.palette.color-accent-content
+					: type == "info" ? AppState.palette.color-info-content
+					: type == "success" ? AppState.palette.color-success-content
+					: type == "warning" ? AppState.palette.color-warning-content
+					: type == "error" ? AppState.palette.color-error-content
+					: AppState.palette.color-neutral-content;
+			}
+		}
+
+		animate background {
+			duration: 300ms;
+			easing: ease-out-quint;
+		}
+	}
+
+	ta := TouchArea {
+		clicked => {
+			clicked()
+		}
+	}
+}

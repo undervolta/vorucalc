@@ -1,13 +1,15 @@
 import { Button, VerticalBox } from "std-widgets.slint";
-import { TabsGroup, Tabs } from "@components/tabs.slint";
 import { Font, Theme, Breakpoint } from "@styles";
 import { AppState, TabsState } from "@stores/app.slint";
+import { TabsGroup, Tabs } from "@components/tabs.slint";
+import { ButtonTrigger } from "@components/modal.slint";
 
 import "./fonts/poppins.medium.ttf";
 
 export { AppState, AppLogic } from "@stores/app.slint";
 
 export component AppWindow inherits Window {
+	min-width: 240px;
 	preferred-width: 300px;
 	preferred-height: 400px;
 	default-font-family: "Poppins";
@@ -33,15 +35,27 @@ export component AppWindow inherits Window {
 				AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
 			}
 		}
-		if (active-tabs == "stg"): Rectangle {
+		if (active-tabs == "note"): Rectangle {
 			background: AppState.screen-width > 400px ? red : blue;
-			preferred-height: 300px;
 		}
+		
 
-		TabsGroup {
-			id: "main-nav";
-			state: tabs[0];
-			// size: "sm";
+		HorizontalLayout {
+			spacing: 4px;
+
+			TabsGroup {
+				id: "main-nav";
+				state: tabs[0];
+				// size: "sm";
+			}
+			ButtonTrigger {
+				bg-color: AppState.palette.color-base-200.darker(0.2);
+				color: AppState.palette.color-base-content;
+				height: 36px;
+				width: 36px;
+				default-padding-x: false;
+				icon: @image-url("icons/cog.svg");
+			}
 		}
 	}
 
