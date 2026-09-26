@@ -5,7 +5,7 @@ use std::{
 	error::Error,
 	path::{ PathBuf }
 };
-use slint::{ Image, Model };
+use slint::{ Image, Model, StyledText };
 
 slint::include_modules!();
 
@@ -21,16 +21,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 	app.set_tabs(tabs.clone());
 
 
-	let app_handle_1 = app.as_weak();
+	let app_handle = app.as_weak();
 	app.on_request_increase_value(move || {
-		if let Some(ui) = app_handle_1.upgrade() {
+		if let Some(ui) = app_handle.upgrade() {
 			ui.set_counter(ui.get_counter() + 1);
 		}
 	});
 
-	let app_handle_2 = app.as_weak();
+	let app_handle = app.as_weak();
 	logic.on_load_image(move |path| {
-		if let Some(_) = app_handle_2.upgrade() {
+		if let Some(_) = app_handle.upgrade() {
 			let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
 			let img_path = &manifest_dir.join("ui/icons").join(path.as_str());
 
@@ -42,14 +42,22 @@ fn main() -> Result<(), Box<dyn Error>> {
 		}
 	});
 
-	let app_handle_3 = app.as_weak();
+	let app_handle = app.as_weak();
 	logic.on_select_tab(move |id, selected| {
-		if let Some(ui) = app_handle_3.upgrade() {
+		if let Some(ui) = app_handle.upgrade() {
 			if let Some((idx, mut tab_group)) = tabs.iter().enumerate().find(|(_, tg)| tg.id == id) {
 				tab_group.selected = selected + 1;
 				ui.set_active_tabs(tab_group.tabs.row_data(selected as usize).unwrap().name);
 				tabs.set_row_data(idx, tab_group);
 			}
+		}
+	});
+
+	let app_handle = app.as_weak();
+	logic.on_convert_to_md(move |content| {
+		match app_handle.upgrade() {
+			Some(_) => StyledText::from_plain_text(&content.to_owned()),
+			None => StyledText::default()
 		}
 	});
 

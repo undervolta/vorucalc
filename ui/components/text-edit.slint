@@ -1,0 +1,78 @@
+// import { TextEdit } from "std-widgets.slint";
+import { ScrollView } from "std-widgets.slint";
+import { AppState } from "@stores/app.slint";
+
+export component FieldInput inherits Rectangle {
+	// private property <bool> mouse-clicked;
+	in-out property <string> text;
+	callback edited();
+
+	background: AppState.palette.color-base-300;
+	border-radius: AppState.palette.radius-field;
+	clip: true;
+
+	ScrollView {
+		private property <length> margin: 4px;
+		
+		height: parent.height;
+		width: parent.width;
+		// content-height: input.height;
+		// content-width: input.width;
+		
+		// ta := TouchArea {
+		// 	clicked => {
+		// 		root.mouse-clicked = true;
+		// 	}
+		// }
+
+		input := TextInput {
+			private property <length> previous-cursor-x: 0px;
+			private property <length> previous-cursor-y: 0px;
+
+			x: 4px; y: 4px;
+			color: AppState.palette.color-base-content;
+			width: max(parent.width, self.preferred-width);
+			height: max(parent.height, self.preferred-height);
+			single-line: false;
+			text <=> root.text;
+			
+			cursor-position-changed(cursor-position) => {
+				// if (root.mouse-clicked) {
+				// 	root.mouse-clicked = false;
+				// 	return;
+				// }
+
+				parent.content-width = max(self.width, cursor-position.x) + (cursor-position.x + margin + self.text-cursor-width < parent.width ? 0px : margin + self.text-cursor-width);
+				parent.content-height = max(self.height, cursor-position.y) + (cursor-position.y + margin < parent.height ? 0px : margin);
+				
+				if (cursor-position.x > previous-cursor-x) {
+					if (cursor-position.x + self.x + self.text-cursor-width > parent.width - margin) {
+						parent.content-x = parent.width - cursor-position.x - margin - self.text-cursor-width;
+					}
+				} else if (cursor-position.x < previous-cursor-x) {
+					if (cursor-position.x + parent.content-x < margin) {
+						parent.content-x = margin - cursor-position.x;
+					}
+				}
+				
+				if (cursor-position.y > previous-cursor-y) {
+					if (cursor-position.y + self.y > parent.height - margin) {
+						parent.content-y = parent.height - cursor-position.y - margin - 28px;
+					}
+				} else if (cursor-position.y < previous-cursor-y) {
+					if (cursor-position.y + parent.content-y < margin) {
+						parent.content-y = margin - cursor-position.y;
+					}
+				}
+
+				previous-cursor-x = cursor-position.x;
+				previous-cursor-y = cursor-position.y;
+			}
+		}
+	}
+
+	animate background {
+		duration: 300ms;
+		easing: ease-out-quint;
+	}
+}

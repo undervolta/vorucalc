@@ -1,8 +1,9 @@
-import { Button, VerticalBox } from "std-widgets.slint";
+import { Button, VerticalBox, Palette } from "std-widgets.slint";
 import { Font, Theme, Breakpoint } from "@styles";
 import { AppState, TabsState } from "@stores/app.slint";
 import { TabsGroup, Tabs } from "@components/tabs.slint";
 import { ButtonTrigger } from "@components/modal.slint";
+import { FieldInput } from "@components/text-edit.slint";
 
 import "./fonts/poppins.medium.ttf";
 
@@ -33,10 +34,14 @@ export component AppWindow inherits Window {
 			clicked => {
 				root.request-increase-value();
 				AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
+				Palette.color-scheme = AppState.palette.is-dark ? dark : light;
 			}
 		}
-		if (active-tabs == "note"): Rectangle {
-			background: AppState.screen-width > 400px ? red : blue;
+		if (active-tabs == "note"): note := FieldInput {
+			text <=> AppState.note;
+			// edited => {
+			// 	AppState.note = self.text;
+			// }
 		}
 		
 
@@ -49,7 +54,7 @@ export component AppWindow inherits Window {
 				// size: "sm";
 			}
 			ButtonTrigger {
-				bg-color: AppState.palette.color-base-200.darker(0.2);
+				bg-color: AppState.palette.color-base-300.darker(0.1);
 				color: AppState.palette.color-base-content;
 				height: 36px;
 				width: 36px;

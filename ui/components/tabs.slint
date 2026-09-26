@@ -15,6 +15,19 @@ export component Tabs inherits Rectangle {
 	min-width: pref-width;
     preferred-width: pref-width;
 
+	bg := Rectangle {
+		x: 3px; y: 3px;
+		width: parent.width - 6px;
+		height: parent.height - 6px;
+		border-radius: AppState.palette.radius-field;
+		background: ta.has-hover && !is-active ? (AppState.palette.is-dark ? Colors.white : Colors.black).transparentize(0.8) : transparent;
+		
+		animate background {
+			duration: 300ms;
+			easing: ease-out-quint;
+		}
+	}
+
 	HorizontalLayout {
 		spacing: 8px;
 		alignment: center;
@@ -42,10 +55,14 @@ export component Tabs inherits Rectangle {
 		}
 	}
 	
-	TouchArea {
+	ta := TouchArea {
 		clicked => {
 			AppLogic.select-tab(parent_id, id);
 		}
+	}
+
+	if (AppState.screen-width <= 400px): Tooltip {
+		text: AppLogic.convert-to-md(label);
 	}
 }
 
@@ -58,7 +75,7 @@ export component TabsGroup inherits Rectangle {
 
 	Rectangle {
 		border-radius: AppState.palette.radius-field;
-		background: AppState.palette.color-base-200;
+		background: AppState.palette.color-base-300;
 		drop-shadow-color: AppState.palette.color-neutral.transparentize(0.5);
 		drop-shadow-blur: 1px;
 		drop-shadow-offset-y: 2px;

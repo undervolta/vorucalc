@@ -21,8 +21,8 @@ export component Button {
 			: type == "warning" ? AppState.palette.color-warning
 			: type == "error" ? AppState.palette.color-error
 			: AppState.palette.color-neutral)
-			.mix(AppState.palette.color-primary, ta.has-hover ? 0.7 : 1)
-			.darker(ta.pressed ? 0 : 0.4);
+			.mix(AppState.palette.is-dark ? Colors.white : Colors.black, ta.has-hover ? 0.8 : 1)
+			.darker(ta.pressed ? 0.4 : 0);
 		
 		drop-shadow-color: AppState.palette.color-neutral.transparentize(0.5);
 		drop-shadow-blur: 1px;
