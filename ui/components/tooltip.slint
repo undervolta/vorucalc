@@ -1,0 +1,38 @@
+import { AppState } from "@stores/app.slint";
+import { Font } from "@styles";
+
+export component Tooltip inherits Rectangle {
+	// in property <string> direction;
+	in property <string> text;
+	in property <length> target-x;
+	in property <length> target-y;
+	in property <bool> show;
+
+	x: target-x - self.width / 2;
+	y: show ? target-y : target-y + 8px;
+	opacity: show ? 1 : 0;
+	width: label.width + 24px;
+	background: AppState.palette.color-base-300;
+	border-radius: AppState.palette.radius-box;
+
+	Rectangle {
+		transform-rotation: 45deg;
+		x: root.width / 2 - self.width / 2;
+		y: root.target-y + root.height + self.height + 2px;
+		height: 24px;
+		width: 24px;
+		border-radius: 4px;
+		background: AppState.palette.color-base-300;
+	}
+
+	label := Text {
+		text: root.text;
+		color: AppState.palette.color-base-content;
+		font-size: Font.xs;
+	}
+
+	animate y, opacity {
+		duration: 300ms;
+		easing: ease-out-quint;
+	}
+} 

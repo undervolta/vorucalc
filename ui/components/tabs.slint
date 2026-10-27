@@ -4,6 +4,8 @@ import {
 	TabsState, TabsType
 } from "@stores/app.slint";
 
+import { Tooltip } from "@components/tooltip.slint";
+
 export component Tabs inherits Rectangle {
 	in property <int> id;
 	in property <string> parent_id;
@@ -62,7 +64,11 @@ export component Tabs inherits Rectangle {
 	}
 
 	if (AppState.screen-width <= 400px): Tooltip {
-		text: AppLogic.convert-to-md(label);
+		text: label;
+		target-x: parent.width / 2;
+		target-y: parent.y - parent.height - 10px;
+		show: ta.has-hover;
+		// text: AppLogic.convert-to-md(label);
 	}
 }
 
