@@ -4,7 +4,7 @@ import {
 	TabsState, TabsType
 } from "@stores/app.slint";
 
-import { Tooltip } from "@components/tooltip.slint";
+import { TooltipUp } from "@components/tooltip.slint";
 
 export component Tabs inherits Rectangle {
 	in property <int> id;
@@ -63,7 +63,7 @@ export component Tabs inherits Rectangle {
 		}
 	}
 
-	if (AppState.screen-width <= 400px): Tooltip {
+	if (AppState.screen-width <= 400px): TooltipUp {
 		text: label;
 		target-x: parent.width / 2;
 		target-y: parent.y - parent.height - 10px;

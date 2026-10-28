@@ -18,7 +18,7 @@ pub fn get_app_tabs() -> ModelRc<TabsState> {
 				},
 				TabsType {
 					name: "var".into(),
-					label: "Variable".into(),
+					label: "Variables".into(),
 					icon: "var.svg".into(),
 					is_active: false,
 					width: 0.0
