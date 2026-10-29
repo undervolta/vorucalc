@@ -5,6 +5,7 @@ import { AppState } from "@stores/app.slint";
 export component FieldInput inherits Rectangle {
 	// private property <bool> mouse-clicked;
 	in-out property <string> text;
+	in property <bool> read-only: false;
 	callback edited();
 
 	background: AppState.palette.color-base-300;
@@ -34,6 +35,7 @@ export component FieldInput inherits Rectangle {
 			width: max(parent.width, self.preferred-width);
 			height: max(parent.height, self.preferred-height);
 			single-line: false;
+			read-only: root.read-only;
 			text <=> root.text;
 			
 			cursor-position-changed(cursor-position) => {
@@ -67,6 +69,10 @@ export component FieldInput inherits Rectangle {
 
 				previous-cursor-x = cursor-position.x;
 				previous-cursor-y = cursor-position.y;
+			}
+
+			edited => {
+				root.edited();
 			}
 		}
 	}

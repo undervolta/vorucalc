@@ -10,23 +10,17 @@ use slint::{ Image, Model, StyledText };
 slint::include_modules!();
 
 mod components;
+mod lang;
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let app = AppWindow::new()?;
-	// let state = app.global::<AppState>();
+	let state = app.global::<AppState>();
 	let logic = app.global::<AppLogic>();
 
 	let tabs = components::tabs::get_app_tabs();
 
 	app.set_tabs(tabs.clone());
 
-
-	let app_handle = app.as_weak();
-	app.on_request_increase_value(move || {
-		if let Some(ui) = app_handle.upgrade() {
-			ui.set_counter(ui.get_counter() + 1);
-		}
-	});
 
 	let app_handle = app.as_weak();
 	logic.on_load_image(move |path| {
@@ -58,6 +52,16 @@ fn main() -> Result<(), Box<dyn Error>> {
 		match app_handle.upgrade() {
 			Some(_) => StyledText::from_plain_text(&content.to_owned()),
 			None => StyledText::default()
+		}
+	});
+	
+	let app_handle = app.as_weak();
+	let state_handle = state.as_weak();
+	logic.on_parse_calc(move |input| {
+		if let Some(_) = app_handle.upgrade() {
+			if let Some(app_state) = state_handle.upgrade() {
+				app_state.set_calc_res(lang::parse::parse_calc(input));
+			}
 		}
 	});
 

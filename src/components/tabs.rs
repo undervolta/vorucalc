@@ -30,13 +30,6 @@ pub fn get_app_tabs() -> ModelRc<TabsState> {
 					is_active: false,
 					width: 0.0
 				},
-				// TabsType {
-				// 	name: "stg".into(),
-				// 	label: "".into(),
-				// 	icon: "cog.svg".into(),
-				// 	is_active: false,
-				// 	width: 14.0
-				// },
 			])))
 		}
 	])))

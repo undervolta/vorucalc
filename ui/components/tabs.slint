@@ -5,6 +5,7 @@ import {
 } from "@stores/app.slint";
 
 import { TooltipUp } from "@components/tooltip.slint";
+import { Font } from "@libs/style.slint";
 
 export component Tabs inherits Rectangle {
 	in property <int> id;
@@ -46,15 +47,20 @@ export component Tabs inherits Rectangle {
 			}
 		}
 	
-		if (AppState.screen-width > 400px): Text {
-			text: label;
-			color: is-active ? AppState.palette.color-primary-content : AppState.palette.color-base-content;
+		if (AppState.screen-width > 450px): VerticalLayout {
+			padding-top: 1px;
 
-			animate color {
-				duration: 300ms;
-				easing: ease-out-quint;
+			Text {
+				font-size: Font.sm;
+				text: label;
+				color: is-active ? AppState.palette.color-primary-content : AppState.palette.color-base-content;
+	
+				animate color {
+					duration: 300ms;
+					easing: ease-out-quint;
+				}
 			}
-		}
+		} 
 	}
 	
 	ta := TouchArea {
@@ -63,12 +69,11 @@ export component Tabs inherits Rectangle {
 		}
 	}
 
-	if (AppState.screen-width <= 400px): TooltipUp {
+	if (AppState.screen-width <= 450px): TooltipUp {
 		text: label;
 		target-x: parent.width / 2;
 		target-y: parent.y - parent.height - 10px;
 		show: ta.has-hover;
-		// text: AppLogic.convert-to-md(label);
 	}
 }
 

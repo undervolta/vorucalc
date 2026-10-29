@@ -1,2 +1,53 @@
+import { ScrollView } from "std-widgets.slint";
 import { AppState } from "@stores/app.slint";
 
+export component LineInput inherits Rectangle {
+	in-out property <string> text;
+	callback edited();
+
+	background: AppState.palette.color-base-300;
+	border-radius: AppState.palette.radius-field;
+	clip: true;
+
+	ScrollView {
+		private property <length> margin: 4px;
+		
+		height: parent.height;
+		width: parent.width;
+
+		TextInput {
+			private property <length> previous-cursor-x: 0px;
+
+			x: 4px; y: 4px;
+			color: AppState.palette.color-base-content;
+			width: max(parent.width, self.preferred-width);
+			height: max(parent.height, self.preferred-height);
+			text <=> root.text;
+			
+			cursor-position-changed(cursor-position) => {
+				parent.content-width = max(self.width, cursor-position.x) + (cursor-position.x + margin + self.text-cursor-width < parent.width ? 0px : margin + self.text-cursor-width);
+				
+				if (cursor-position.x > previous-cursor-x) {
+					if (cursor-position.x + self.x + self.text-cursor-width > parent.width - margin) {
+						parent.content-x = parent.width - cursor-position.x - margin - self.text-cursor-width;
+					}
+				} else if (cursor-position.x < previous-cursor-x) {
+					if (cursor-position.x + parent.content-x < margin) {
+						parent.content-x = margin - cursor-position.x;
+					}
+				}
+
+				previous-cursor-x = cursor-position.x;
+			}
+
+			edited => {
+				root.edited();
+			}
+		}
+	}
+
+	animate background {
+		duration: 300ms;
+		easing: ease-out-quint;
+	}
+}

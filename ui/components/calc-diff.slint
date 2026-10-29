@@ -1,0 +1,49 @@
+import { FieldInput } from "@components/text-edit.slint";
+import { AppState, AppLogic } from "@stores/app.slint";
+
+export component CalcDiff inherits Rectangle {
+	in-out property <length> input-len;
+	
+	input := FieldInput {
+		x: 0;
+		width: max(parent.input-len, 100px);
+		text <=> AppState.calc-input;
+
+		edited => {
+			AppLogic.parse-calc(self.text);
+		}
+	}
+
+	bar := Rectangle {
+		x: root.input-len;
+		width: 8px;
+
+		ta := TouchArea {
+			mouse-cursor: ew-resize;
+
+			moved => {
+				if (self.pressed) {
+                    root.input-len = max(
+                        100px,
+                        min(
+                            root.width - bar.width - 100px,
+                            root.input-len + self.mouse-x - self.pressed-x
+                        )
+                    );
+                }
+			}
+		}
+
+		Image {
+			source: @image-url("../icons/vertical-dots.svg");
+			colorize: AppState.palette.color-neutral-content;
+		}
+	}
+
+	FieldInput {
+		x: min(bar.x + bar.width, parent.width - 100px);
+		width: max(parent.width - parent.input-len - bar.width, 100px);
+		read-only: true;
+		text <=> AppState.calc-res;
+	}
+}

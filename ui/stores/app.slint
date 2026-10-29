@@ -19,6 +19,9 @@ export global AppState {
 	out property <ThemePalette> palette: Theme.list[selected-theme];
 	in property <string> screen;
 	in property <length> screen-width;
+	in-out property <string> calc-input;
+	in-out property <string> calc-res;
+	in-out property <string> var;
 	in-out property <string> note;
 }
 
@@ -26,4 +29,5 @@ export global AppLogic {
 	pure callback load-image(string) -> image;			// (path)
 	pure callback convert-to-md(string) -> styled-text;	// (content)
 	callback select-tab(string, int);					// (id, selected)
+	callback parse-calc(string);						// (input)
 }

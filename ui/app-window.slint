@@ -4,6 +4,8 @@ import { AppState, TabsState } from "@stores/app.slint";
 import { TabsGroup, Tabs } from "@components/tabs.slint";
 import { ButtonTrigger } from "@components/modal.slint";
 import { FieldInput } from "@components/text-edit.slint";
+import { CalcDiff } from "@components/calc-diff.slint";
+
 
 import "./fonts/poppins.medium.ttf";
 
@@ -18,37 +20,35 @@ export component AppWindow inherits Window {
 	
 	in-out property <[TabsState]> tabs;
 	in-out property <string> active-tabs: "calc";
-	in-out property <int> counter: 42;
-
-	callback request-increase-value();
 	
 	VerticalBox {
 		// padding: 0px;
 		// spacing: 0px;
 
-		if (active-tabs == "calc"): Text {
-			text: "Counter: \{root.counter} X";
+		if (active-tabs == "calc"): CalcDiff {
+			input-len: parent.width / 2;
 		}
-		if (active-tabs == "var"): Button {
-			text: "Increase value";
-			clicked => {
-				root.request-increase-value();
-				AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
-				Palette.color-scheme = AppState.palette.is-dark ? dark : light;
-			}
+		// Button {
+		// 	text: "Increase value";
+		// 	clicked => {
+		// 		root.request-increase-value();
+		// 		AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
+		// 		Palette.color-scheme = AppState.palette.is-dark ? dark : light;
+		// 	}
+		// }
+		if (active-tabs == "var"): FieldInput {
+			text <=> AppState.var;
 		}
-		if (active-tabs == "note"): note := FieldInput {
+		if (active-tabs == "note"): FieldInput {
 			text <=> AppState.note;
 		}
 		
-
 		HorizontalLayout {
 			spacing: 4px;
 
 			TabsGroup {
 				id: "main-nav";
 				state: tabs[0];
-				// size: "sm";
 			}
 			ButtonTrigger {
 				bg-color: AppState.palette.color-base-300.darker(0.1);
