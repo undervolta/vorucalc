@@ -6,6 +6,8 @@ edition = "2024"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+chumsky = "0.13.0"
+logos = "0.16.1"
 slint = "1.16.1"
 
 [build-dependencies]

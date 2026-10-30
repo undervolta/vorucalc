@@ -60,7 +60,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 	logic.on_parse_calc(move |input| {
 		if let Some(_) = app_handle.upgrade() {
 			if let Some(app_state) = state_handle.upgrade() {
-				app_state.set_calc_res(lang::parse::parse_calc(input));
+				app_state.set_calc_res(lang::parser::parse_calc(input));
 			}
 		}
 	});

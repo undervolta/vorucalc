@@ -1,1 +1,2 @@
-pub mod parse;
+pub mod lexer;
+pub mod parser;
