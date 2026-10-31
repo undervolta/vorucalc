@@ -127,18 +127,23 @@ fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<Stmt>, extra::Err<Rich<'a, T
 		.then_ignore(end())
 }
 
+fn round_to_places(val: f64, places: i32) -> f64 {
+	let factor = 10.0_f64.powi(places);
+	(val * factor).round() / factor
+}
+
 #[derive(Debug, Clone, Copy)]
-enum Value {
+pub enum Value {
 	Int(i64),
 	Float(f64),
 	Invalid
 }
 
 impl Value {
-	fn as_f64(self) -> f64 {
+	pub fn as_f64(self) -> f64 {
 		match self {
 			Value::Int(n) => n as f64,
-			Value::Float(f) => f,
+			Value::Float(f) => round_to_places(f, 3),
 			Value::Invalid => 0.0
 		}
 	}
@@ -197,7 +202,7 @@ fn lex(src: &str) -> Vec<Token> {
 		.collect()
 }
 
-fn run(src: &str) -> Result<HashMap<String, Value>, String> {
+pub fn run(src: &str) -> Result<HashMap<String, Value>, String> {
 	let tokens = lex(src);
 	let stmts = match parser().parse(tokens.as_slice()).into_result() {
 		Ok(s) => s,
@@ -219,19 +224,28 @@ fn run(src: &str) -> Result<HashMap<String, Value>, String> {
 	Ok(env)
 }
 
-const VARS: &str = r"ten = 10; point = 21.5 - 1 + 7.5; par = 2 * (5 + (3 + 1) / 2)\n err = 999999999999999999999999999; from_var = ten + 5 * 3";
+pub const INPUT: &str = r"ten = 10; point = 21.5 - 1 + 7.5;\n par = 2 * (5 + (3 + 1) / 2)\n err = 999999999999999999999999999; from_var = ten + 5 * 3";
 
 // cargo +nightly test --test vars parse -- --no-capture
 
 #[test]
 fn parse() {
-	let parse_res = run(VARS);
+	let parse_res = run(INPUT);
 
 	if let Ok(map) = parse_res {
 		for (key, val) in map {
-			println!("{key} = {val}");
+			println!("Var: {key} = {val}");
 		}
 	} else {
 		println!("Error: {:?}", parse_res.err());
 	}
 }
+
+// pub mod vars {
+//     use crate::{INPUT, run, Value};
+// 	use std::collections::HashMap;
+
+// 	pub fn get_vars() -> Result<HashMap<String, Value>, String> {
+// 		run(INPUT)
+// 	}
+// }
