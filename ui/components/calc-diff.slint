@@ -1,5 +1,6 @@
 import { FieldInput } from "@components/text-edit.slint";
 import { AppState, AppLogic } from "@stores/app.slint";
+import { Font } from "@styles";
 
 export component CalcDiff inherits Rectangle {
 	in-out property <length> input-len;
@@ -7,10 +8,11 @@ export component CalcDiff inherits Rectangle {
 	input := FieldInput {
 		x: 0;
 		width: max(parent.input-len, 100px);
+		font-size: Font.lg;
 		text <=> AppState.calc-input;
 
 		edited => {
-			AppLogic.parse-calc(self.text);
+			AppLogic.parse-calc();
 		}
 	}
 
@@ -44,6 +46,8 @@ export component CalcDiff inherits Rectangle {
 		x: min(bar.x + bar.width, parent.width - 100px);
 		width: max(parent.width - parent.input-len - bar.width, 100px);
 		read-only: true;
+		font-size: Font.lg;
+		font-weight: 600;
 		text <=> AppState.calc-res;
 	}
 }

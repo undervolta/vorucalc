@@ -7,7 +7,7 @@ use std::{ fmt, collections::HashMap };
 #[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\r]+")]
 #[logos(error = LexError)]
-enum Token {
+pub enum Token {
 	#[token("=")]
 	Equal,
 
@@ -26,7 +26,7 @@ enum Token {
 	#[token(";")]
 	Semicolon,
 
-	#[token(r"\n")]
+	#[token("\n")]
 	NewLine,
 
 	#[token("(")]
@@ -49,7 +49,7 @@ enum Token {
 }
 
 #[derive(Debug, Clone, PartialEq, Default)]
-enum LexError {
+pub enum LexError {
 	NumberOverflow,
 
 	#[default]
@@ -57,7 +57,7 @@ enum LexError {
 }
 
 #[derive(Debug, Clone, Copy)]
-enum BinOp {
+pub enum BinOp {
 	Add,
 	Sub,
 	Mul,
@@ -65,7 +65,7 @@ enum BinOp {
 }
 
 #[derive(Debug, Clone)]
-enum Expr {
+pub enum Expr {
 	Int(i64),
 	Float(f64),
 	Var(String),
@@ -224,7 +224,7 @@ pub fn run(src: &str) -> Result<HashMap<String, Value>, String> {
 	Ok(env)
 }
 
-pub const INPUT: &str = r"ten = 10; point = 21.5 - 1 + 7.5;\n par = 2 * (5 + (3 + 1) / 2)\n err = 999999999999999999999999999; from_var = ten + 5 * 3";
+pub const INPUT: &str = "ten = 10; point = 21.5 - 1 + 7.5;\n par = 2 * (5 + (3 + 1) / 2)\n err = 999999999999999999999999999; from_var = ten + 5 * 3";
 
 // cargo +nightly test --test vars parse -- --no-capture
 

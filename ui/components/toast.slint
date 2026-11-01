@@ -1,0 +1,31 @@
+import { Font } from "@styles";
+import { AppState } from "@stores/app.slint";
+
+export component Toast inherits Rectangle {
+	in property <string> text;
+	in property <string> variant;
+	
+	preferred-height: 24px;
+	border-radius: AppState.palette.radius-box;
+	background: variant == "info" ? AppState.palette.color-info
+		: variant == "success"  ? AppState.palette.color-success
+		: variant == "warning"  ? AppState.palette.color-warning
+		: variant == "error"  ? AppState.palette.color-error
+		: AppState.palette.color-neutral;
+
+	HorizontalLayout {
+		padding: 8px;
+
+		Text {
+			text <=> root.text;
+			font-size: Font.sm;
+			wrap: word-wrap;
+			vertical-alignment: center;
+			color: root.variant == "info" ? AppState.palette.color-info-content
+				: root.variant == "success"  ? AppState.palette.color-success-content
+				: root.variant == "warning"  ? AppState.palette.color-warning-content
+				: root.variant == "error"  ? AppState.palette.color-error-content
+				: AppState.palette.color-neutral-content;
+		}
+	}
+}

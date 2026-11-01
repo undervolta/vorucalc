@@ -5,76 +5,74 @@ use chumsky::{
 use std::{ collections::HashMap };
 
 mod vars; 
-use vars::{ run as get_vars, INPUT as VARS, Value };
+use vars::{ run as get_vars, INPUT as VARS, Token, Value, Expr, BinOp };
 
-#[derive(Logos, Debug, PartialEq, Clone)]
-#[logos(skip r"[ \t\r]+")]
-#[logos(error = LexError)]
-enum Token {
-	#[token("=")]
-	Equal,
+// #[derive(Logos, Debug, PartialEq, Clone)]
+// #[logos(skip r"[ \t\r]+")]
+// #[logos(error = LexError)]
+// enum Token {
+// 	#[token("=")]
+// 	Equal,
 
-	#[token("+")]
-	Plus,
+// 	#[token("+")]
+// 	Plus,
 
-	#[token("-")]
-	Minus,
+// 	#[token("-")]
+// 	Minus,
 
-	#[token("*")]
-	Star,
+// 	#[token("*")]
+// 	Star,
 
-	#[token("/")]
-	Slash,
+// 	#[token("/")]
+// 	Slash,
 
-	#[token(r"\n")]
-	NewLine,
+// 	#[token(r"\n")]
+// 	NewLine,
 
-	#[token("(")]
-	LParen,
+// 	#[token("(")]
+// 	LParen,
 
-	#[token(")")]
-	RParen,
+// 	#[token(")")]
+// 	RParen,
 
-	#[regex(r"[0-9]+\.[0-9]+", |lex| lex.slice().parse::<f64>().map_err(|_| LexError::NumberOverflow))]
-	Float(f64),
+// 	#[regex(r"[0-9]+\.[0-9]+", |lex| lex.slice().parse::<f64>().map_err(|_| LexError::NumberOverflow))]
+// 	Float(f64),
 
-	#[regex(r"[0-9]+", |lex| lex.slice().parse::<i64>().map_err(|_| LexError::NumberOverflow))]
-	Number(i64),
+// 	#[regex(r"[0-9]+", |lex| lex.slice().parse::<i64>().map_err(|_| LexError::NumberOverflow))]
+// 	Number(i64),
 
-	// Identifiers
-	#[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_owned())]
-	Identifier(String),
+// 	// Identifiers
+// 	#[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_owned())]
+// 	Identifier(String),
 
-	Error
-}
+// 	Error
+// }
 
-#[derive(Debug, Clone, PartialEq, Default)]
-enum LexError {
-	NumberOverflow,
+// #[derive(Debug, Clone, PartialEq, Default)]
+// enum LexError {
+// 	NumberOverflow,
 
-	#[default]
-	UnknownToken,
-}
+// 	#[default]
+// 	UnknownToken,
+// }
 
-#[derive(Debug, Clone, Copy)]
-enum BinOp {
-	Add,
-	Sub,
-	Mul,
-	Div,
-}
+// #[derive(Debug, Clone, Copy)]
+// enum BinOp {
+// 	Add,
+// 	Sub,
+// 	Mul,
+// 	Div,
+// }
 
-#[derive(Debug, Clone)]
-enum Expr {
-	Int(i64),
-	Float(f64),
-	Var(String),
-	Neg(Box<Expr>),
-	Bin(Box<Expr>, BinOp, Box<Expr>),
-	Invalid,
-}
-
-// type Stmt = (String, Expr);
+// #[derive(Debug, Clone)]
+// enum Expr {
+// 	Int(i64),
+// 	Float(f64),
+// 	Var(String),
+// 	Neg(Box<Expr>),
+// 	Bin(Box<Expr>, BinOp, Box<Expr>),
+// 	Invalid,
+// }
 
 fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<Expr>, extra::Err<Rich<'a, Token>>> {
 	let expr = recursive(|expr| {
@@ -111,10 +109,6 @@ fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<Expr>, extra::Err<Rich<'a, T
 		)
 	});
 
-	// let ident = select! { Token::Identifier(s) => s };
-
-	// let stmt = ident.then_ignore(just(Token::Equal)).then(expr);
-
 	// statements split by `;` or newline (any amount of them)
 	let sep = just(Token::NewLine)
 		.repeated()
@@ -126,33 +120,6 @@ fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<Expr>, extra::Err<Rich<'a, T
 		.collect::<Vec<_>>()
 		.then_ignore(end())
 }
-
-// #[derive(Debug, Clone, Copy)]
-// enum Value {
-// 	Int(i64),
-// 	Float(f64),
-// 	Invalid
-// }
-
-// impl Value {
-// 	fn as_f64(self) -> f64 {
-// 		match self {
-// 			Value::Int(n) => n as f64,
-// 			Value::Float(f) => f,
-// 			Value::Invalid => 0.0
-// 		}
-// 	}
-// }
-
-// impl fmt::Display for Value {
-// 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-// 		match self {
-// 			Value::Int(n) => write!(f, "{n}"),
-// 			Value::Float(x) => write!(f, "{x}"),
-// 			Value::Invalid => write!(f, "?")
-// 		}
-// 	}
-// }
 
 fn apply(l: Value, op: BinOp, r: Value) -> Option<Value> {
 	match (l, r) {
@@ -227,9 +194,9 @@ fn run(src: &str) -> Result<HashMap<i64, Value>, String> {
 	Ok(env)
 }
 
-const INPUT: &str = r"10 + 2\n13.2 - 4.32 * 2.1\n 10 + (ten / 3 + (2.1 - par))\n err + 2";
+const INPUT: &str = "10 + 2\n13.2 - 4.32 * 2.1\n 10 + (ten / 3 + (2.1 - par))\n err + 2";
 
-// cargo +nightly test --test vars parse -- --no-capture
+// cargo +nightly test --test calc parse -- --no-capture
 
 #[test]
 fn parse() {

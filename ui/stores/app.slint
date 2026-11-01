@@ -23,11 +23,12 @@ export global AppState {
 	in-out property <string> calc-res;
 	in-out property <string> var;
 	in-out property <string> note;
+	in-out property <string> error-msg;
 }
 
 export global AppLogic {
 	pure callback load-image(string) -> image;			// (path)
 	pure callback convert-to-md(string) -> styled-text;	// (content)
 	callback select-tab(string, int);					// (id, selected)
-	callback parse-calc(string);						// (input)
+	callback parse-calc();
 }

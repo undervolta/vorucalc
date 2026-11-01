@@ -5,7 +5,7 @@ use std::{
 	error::Error,
 	path::{ PathBuf }
 };
-use slint::{ Image, Model, StyledText };
+use slint::{ Image, Model, SharedString, StyledText };
 
 slint::include_modules!();
 
@@ -55,13 +55,26 @@ fn main() -> Result<(), Box<dyn Error>> {
 		}
 	});
 	
-	let app_handle = app.as_weak();
 	let state_handle = state.as_weak();
-	logic.on_parse_calc(move |input| {
-		if let Some(_) = app_handle.upgrade() {
-			if let Some(app_state) = state_handle.upgrade() {
-				app_state.set_calc_res(lang::parser::parse_calc(input));
-			}
+	logic.on_parse_calc(move || {
+		if let Some(app_state) = state_handle.upgrade() {
+			let res = match lang::calc::parse_calc(app_state.get_calc_input(), app_state.get_var()) {
+				Ok(res) => {
+					if !res.to_owned().contains("?") {
+						app_state.set_error_msg(SharedString::new());
+					} else {
+						app_state.set_error_msg(SharedString::from("Unknown variable(s) at line N"));
+					}
+					
+					res
+				}, 
+				Err(err) => {
+					app_state.set_error_msg(SharedString::from(err));
+					SharedString::from("?")
+				}
+			};
+
+			app_state.set_calc_res(res);
 		}
 	});
 

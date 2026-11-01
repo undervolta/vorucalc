@@ -1,10 +1,14 @@
 // import { TextEdit } from "std-widgets.slint";
 import { ScrollView } from "std-widgets.slint";
 import { AppState } from "@stores/app.slint";
+import { Font } from "@styles";
 
 export component FieldInput inherits Rectangle {
 	// private property <bool> mouse-clicked;
 	in-out property <string> text;
+	in property <brush> text-color;
+	in property <length> font-size: Font.base;
+	in property <int> font-weight: 400;
 	in property <bool> read-only: false;
 	callback edited();
 
@@ -31,11 +35,14 @@ export component FieldInput inherits Rectangle {
 			private property <length> previous-cursor-y: 0px;
 
 			x: 4px; y: 4px;
-			color: AppState.palette.color-base-content;
+			color: text-color == transparent ? AppState.palette.color-base-content : text-color;
 			width: max(parent.width, self.preferred-width);
 			height: max(parent.height, self.preferred-height);
 			single-line: false;
 			read-only: root.read-only;
+			font-size: root.font-size;
+			font-weight: root.font-weight;
+			
 			text <=> root.text;
 			
 			cursor-position-changed(cursor-position) => {
@@ -75,6 +82,8 @@ export component FieldInput inherits Rectangle {
 				root.edited();
 			}
 		}
+
+		@children
 	}
 
 	animate background {

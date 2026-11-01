@@ -12,7 +12,7 @@ export component TooltipUp inherits Rectangle {
 	y: show ? target-y : target-y + 8px;
 	opacity: show ? 1 : 0;
 	width: label.width + 24px;
-	background: AppState.palette.color-base-300;
+	background: AppState.palette.color-neutral;
 	border-radius: AppState.palette.radius-box;
 
 	Rectangle {
@@ -22,12 +22,12 @@ export component TooltipUp inherits Rectangle {
 		height: 24px;
 		width: 24px;
 		border-radius: 4px;
-		background: AppState.palette.color-base-300;
+		background: AppState.palette.color-neutral;
 	}
 
 	label := Text {
 		text: root.text;
-		color: AppState.palette.color-base-content;
+		color: AppState.palette.color-neutral-content;
 		font-size: Font.xs;
 	}
 
