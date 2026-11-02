@@ -2,9 +2,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::{
-	error::Error,
-	path::{ PathBuf }
+	error::Error, path::PathBuf
 };
+use regex::Regex;
 use slint::{ Image, Model, SharedString, StyledText };
 
 slint::include_modules!();
@@ -20,7 +20,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let tabs = components::tabs::get_app_tabs();
 
 	app.set_tabs(tabs.clone());
-
 
 	let app_handle = app.as_weak();
 	logic.on_load_image(move |path| {
@@ -60,16 +59,67 @@ fn main() -> Result<(), Box<dyn Error>> {
 		if let Some(app_state) = state_handle.upgrade() {
 			let res = match lang::calc::parse_calc(app_state.get_calc_input(), app_state.get_var()) {
 				Ok(res) => {
-					if !res.to_owned().contains("?") {
+					if !res.contains("?") {
 						app_state.set_error_msg(SharedString::new());
 					} else {
-						app_state.set_error_msg(SharedString::from("Unknown variable(s) at line N"));
+						let lines = res.split("\n").collect::<Vec<&str>>();
+						let lines_len = lines.len() - 1;
+
+						let err_lines = lines.into_iter().enumerate().fold(String::new(), |mut acc, (idx, line)| {
+							if line.contains("?") {
+								if idx < lines_len - 1 { 
+									acc.push_str(&format!("{}, ", &(idx + 1).to_string())[..]);
+								}
+								else {
+									acc.push_str(&(idx + 1).to_string());
+								}
+							}
+
+							acc
+						});
+
+						app_state.set_error_msg(SharedString::from(format!("Unknown variable(s) at {} {}.", 
+							if err_lines.contains(",") { "lines" } else { "line" },
+							err_lines
+						)));
 					}
-					
+
 					res
 				}, 
 				Err(err) => {
-					app_state.set_error_msg(SharedString::from(err));
+					let re = Regex::new(r"\d+\.\.\d+").unwrap();
+					
+					if let Some(mat) = re.find(&err.to_string()) {
+						if let &[first, .., last] = &mat.as_str().split("..").collect::<Vec<&str>>()[..] {
+							let first_pos = first.parse::<usize>().unwrap_or(0);
+							let last_pos = last.parse::<usize>().unwrap_or(0);
+							let is_same_pos = first == last;
+
+							let get_line = | search_pos: usize | -> i32 {
+								let mut line = 1;
+
+								for (pos, input) in app_state.get_calc_input().chars().enumerate() {
+									if input == '\n' { line += 1; }
+									if pos == search_pos { return line; }
+								}
+
+								line
+							};
+
+							let first_line = get_line(first_pos);
+							let mut last_line = first_line;
+
+							if !is_same_pos {
+								last_line = get_line(last_pos);
+							}
+							
+							app_state.set_error_msg(SharedString::from(format!("Error at {} {}.", 
+								if is_same_pos { "line" } else { "lines" },
+								if is_same_pos { first_line.to_string() } else { format!("{} - {}", first_line, last_line) }
+							)));
+						};
+					}
+
 					SharedString::from("?")
 				}
 			};

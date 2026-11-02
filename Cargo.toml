@@ -8,6 +8,7 @@ edition = "2024"
 [dependencies]
 chumsky = "0.13.0"
 logos = "0.16.1"
+regex = "1.13.1"
 slint = "1.16.1"
 
 [build-dependencies]

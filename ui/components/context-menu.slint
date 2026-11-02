@@ -1,0 +1,108 @@
+export struct ContextMenuEntry {
+    title: string,
+    enabled: bool,
+}
+
+export component ContextMenu inherits Rectangle {
+    in property <bool> enabled: true;
+    in property <[ContextMenuEntry]> entries: [];
+
+    callback activated(int);
+    callback opened();
+    callback closed();
+
+    in-out property <int> selected-index: -1;
+    in-out property <length> menu-width: 180px;
+    in-out property <length> item-height: 32px;
+
+    property <length> popup-x: 0px;
+    property <length> popup-y: 0px;
+
+    background: transparent;
+
+    function show(position: Point) {
+        if (root.enabled) {
+            root.popup-x = position.x;
+            root.popup-y = position.y;
+            popup.show();
+            root.opened();
+        }
+    }
+
+    function close() {
+        popup.close();
+    }
+
+    touch := TouchArea {
+        width: parent.width;
+        height: parent.height;
+
+        pointer-event(event) => {
+            if (root.enabled
+                && event.button == PointerEventButton.right
+                && event.kind == PointerEventKind.down) {
+                root.show({
+                    x: self.absolute-position.x
+                        + self.mouse-x
+                        - root.absolute-position.x,
+                    y: self.absolute-position.y
+                        + self.mouse-y
+                        - root.absolute-position.y,
+                });
+            }
+        }
+    }
+
+    popup := PopupWindow {
+        x: root.popup-x;
+        y: root.popup-y;
+        width: root.menu-width;
+        height: root.entries.length * root.item-height;
+
+        close-policy: close-on-click-outside;
+
+        Rectangle {
+            width: parent.width;
+            height: parent.height;
+            background: #252525;
+            border-color: #414141;
+            border-width: 1px;
+            border-radius: 8px;
+
+            VerticalLayout {
+                spacing: 2px;
+                padding: 4px;
+
+                for entry[i] in root.entries: Rectangle {
+                    width: parent.width;
+                    height: root.item-height;
+                    background: item-touch.has-hover
+                        ? #3c3c3c
+                        : transparent;
+                    border-radius: 4px;
+
+                    Text {
+                        text: entry.title;
+                        color: entry.enabled
+                            ? #eeeeee
+                            : #777777;
+                        vertical-alignment: center;
+                        x: 10px;
+                    }
+
+                    item-touch := TouchArea {
+                        width: parent.width;
+                        height: parent.height;
+                        enabled: entry.enabled;
+
+                        clicked => {
+                            root.selected-index = i;
+                            root.activated(i);
+                            popup.close();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
