@@ -65,7 +65,7 @@ pub fn parse_var(src: &SharedString) -> Result<HashMap<String, Value>, String> {
 	let tokens = lex(src);
 	let stmts = match parser().parse(tokens.as_slice()).into_result() {
 		Ok(s) => s,
-		Err(errs) => return Err(errs.into_iter().map(|err| format!("{err:?}\n")).collect()),
+		Err(errs) => return Err(errs.into_iter().map(|err| format!("var:{err:?}\n")).collect()),
 	};
 
 	let mut env = HashMap::new();

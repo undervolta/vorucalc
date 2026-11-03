@@ -63,15 +63,14 @@ pub fn parse_calc(calc_input: SharedString, var_input: SharedString) -> Result<S
 		Err(errs) => {
 			let err_len = errs.iter().len();
 			return Err(SharedString::from(errs.into_iter().enumerate()
-				.map(|(idx, err)| format!("{:?}{}", err, if idx < err_len - 1 { "\n" } else { "" }))
+				.map(|(idx, err)| format!("calc:{:?}{}", err, if idx < err_len - 1 { "\n" } else { "" }))
 				.collect::<String>())
 			)
 		}
-		// Err(errs) => return Err(errs.into_iter().map(|err| SharedString::from(format!("{err}\n"))).collect()),
 	};
 
 	let mut env = HashMap::<i64, Value>::new();
-	let vars = parse_var(&var_input).unwrap_or(HashMap::<String, Value>::new());
+	let vars = parse_var(&var_input)?;
 
 	for (idx, expr) in stmts.iter().enumerate() {
 		match eval(expr, &vars) {

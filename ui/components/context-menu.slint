@@ -1,108 +1,137 @@
+import { AppState } from "@stores/app.slint";
+import { Font } from "@styles";
+
 export struct ContextMenuEntry {
-    title: string,
-    enabled: bool,
+	title: string,
+	disabled: bool,
 }
 
 export component ContextMenu inherits Rectangle {
-    in property <bool> enabled: true;
-    in property <[ContextMenuEntry]> entries: [];
+	in property <bool> enabled: true;
+	in property <[ContextMenuEntry]> entries: [];
 
-    callback activated(int);
-    callback opened();
-    callback closed();
+	callback opened();
+	callback closed();
+	callback activated(int);
+	callback item-selected(int);
 
-    in-out property <int> selected-index: -1;
-    in-out property <length> menu-width: 180px;
-    in-out property <length> item-height: 32px;
+	in-out property <int> selected-index: -1;
+	in-out property <length> menu-width: 128px;
+	in-out property <length> item-height: 32px;
 
-    property <length> popup-x: 0px;
-    property <length> popup-y: 0px;
+	property <length> popup-x: 0px;
+	property <length> popup-y: 0px;
 
-    background: transparent;
+	background: transparent;
+	opacity: 0;
 
-    function show(position: Point) {
-        if (root.enabled) {
-            root.popup-x = position.x;
-            root.popup-y = position.y;
-            popup.show();
-            root.opened();
-        }
-    }
+	function show(position: Point) {
+		if (root.enabled) {
+			root.popup-x = position.x;
+			root.popup-y = position.y;
 
-    function close() {
-        popup.close();
-    }
+			popup.show();
+			root.opened();
+		}
+	}
 
-    touch := TouchArea {
-        width: parent.width;
-        height: parent.height;
+	function close() {
+		popup.close();
+	}
 
-        pointer-event(event) => {
-            if (root.enabled
-                && event.button == PointerEventButton.right
-                && event.kind == PointerEventKind.down) {
-                root.show({
-                    x: self.absolute-position.x
-                        + self.mouse-x
-                        - root.absolute-position.x,
-                    y: self.absolute-position.y
-                        + self.mouse-y
-                        - root.absolute-position.y,
-                });
-            }
-        }
-    }
+	popup := PopupWindow {
+		x: root.popup-x;
+		y: root.popup-y;
+		width: root.menu-width + 4px;
+		// height: (root.entries.length * root.item-height) + (root.entries.length - 1) * 2px + 8px;
+		
+		close-policy: close-on-click-outside;
+		
+		content := Rectangle {
+			background: AppState.palette.color-neutral;
+			drop-shadow-offset-y: 2px;
+			drop-shadow-blur: 4px;
+			drop-shadow-color: black.with-alpha(0.3);
+			border-color: AppState.palette.color-base-200;
+			border-width: 1px;
+			border-radius: AppState.palette.radius-selector;
 
-    popup := PopupWindow {
-        x: root.popup-x;
-        y: root.popup-y;
-        width: root.menu-width;
-        height: root.entries.length * root.item-height;
+			VerticalLayout {
+				spacing: 2px;
+				padding-top: 4px;
+				padding-bottom: 4px;
 
-        close-policy: close-on-click-outside;
+				for entry[i] in root.entries: HorizontalLayout {
+					property <bool> is-separator: entry.title == "---";
+					
+					if (!is-separator): HorizontalLayout {
+						padding-left: 4px;
+						padding-right: 4px;
 
-        Rectangle {
-            width: parent.width;
-            height: parent.height;
-            background: #252525;
-            border-color: #414141;
-            border-width: 1px;
-            border-radius: 8px;
+						Rectangle {
+							height: root.item-height;
+							background: item-touch.has-hover
+								? AppState.palette.color-base-200
+								: transparent;
+							border-radius: 4px;
+		
+							if (!is-separator): Text {
+								text: entry.title;
+								font-size: Font.sm;
+								color: entry.disabled
+									? AppState.palette.color-base-content.with-alpha(0.5)
+									: AppState.palette.color-base-content;
+								vertical-alignment: center;
+								x: 10px;
+							}
+		
+							item-touch := TouchArea {
+								enabled: !entry.disabled;
+		
+								clicked => {
+									root.selected-index = i;
+									root.activated(i);
+									popup.close();
+								}
+							}
+						}
+					}
 
-            VerticalLayout {
-                spacing: 2px;
-                padding: 4px;
+					if (is-separator): HorizontalLayout {
+						padding-top: 2px;
+						padding-bottom: 2px;
 
-                for entry[i] in root.entries: Rectangle {
-                    width: parent.width;
-                    height: root.item-height;
-                    background: item-touch.has-hover
-                        ? #3c3c3c
-                        : transparent;
-                    border-radius: 4px;
+						Rectangle {
+							height: 1px;
+							background: AppState.palette.color-base-200;
+						}
+					} 
+				}
+			}
+		}	
+	}
 
-                    Text {
-                        text: entry.title;
-                        color: entry.enabled
-                            ? #eeeeee
-                            : #777777;
-                        vertical-alignment: center;
-                        x: 10px;
-                    }
+	TouchArea {
+		pointer-event(event) => {
+			if (root.enabled
+				&& event.button == PointerEventButton.right
+				&& event.kind == PointerEventKind.down
+			) {
+				root.show({
+					x: self.absolute-position.x
+						+ self.mouse-x
+						- root.absolute-position.x,
+					y: self.absolute-position.y
+						+ self.mouse-y
+						- root.absolute-position.y,
+				});
+			}
+		}
+	}
 
-                    item-touch := TouchArea {
-                        width: parent.width;
-                        height: parent.height;
-                        enabled: entry.enabled;
-
-                        clicked => {
-                            root.selected-index = i;
-                            root.activated(i);
-                            popup.close();
-                        }
-                    }
-                }
-            }
-        }
-    }
+	changed selected-index => {
+		if (selected-index >= 0) {
+			item-selected(selected-index);
+		}
+	}
 }

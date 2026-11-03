@@ -2,52 +2,66 @@ import { FieldInput } from "@components/text-edit.slint";
 import { AppState, AppLogic } from "@stores/app.slint";
 import { Font } from "@styles";
 
-export component CalcDiff inherits Rectangle {
+export component CalcDiff inherits FocusScope {
 	in-out property <length> input-len;
 	
-	input := FieldInput {
-		x: 0;
-		width: max(parent.input-len, 100px);
-		font-size: Font.lg;
-		text <=> AppState.calc-input;
+	forward-focus: input;
 
-		edited => {
-			AppLogic.parse-calc();
-		}
-	}
+	Rectangle {
+		opacity: root.enabled ? 1 : 0;
 
-	bar := Rectangle {
-		x: root.input-len;
-		width: 8px;
+		input := FieldInput {
+			x: 0;
+			width: max(root.input-len, 100px);
+			font-size: Font.lg;
+			text <=> AppState.calc-input;
+			enabled: root.enabled;
+			move-to-last-on-init: true;
 
-		ta := TouchArea {
-			mouse-cursor: ew-resize;
-
-			moved => {
-				if (self.pressed) {
-                    root.input-len = max(
-                        100px,
-                        min(
-                            root.width - bar.width - 100px,
-                            root.input-len + self.mouse-x - self.pressed-x
-                        )
-                    );
-                }
+			edited => {
+				AppLogic.parse-calc();
+			}
+			on-init => {
+				self.focus();
 			}
 		}
 
-		Image {
-			source: @image-url("../icons/vertical-dots.svg");
-			colorize: AppState.palette.color-neutral-content;
-		}
-	}
+		bar := Rectangle {
+			x: root.input-len;
+			width: 8px;
+			opacity: root.enabled ? 1 : 0;
 
-	FieldInput {
-		x: min(bar.x + bar.width, parent.width - 100px);
-		width: max(parent.width - parent.input-len - bar.width, 100px);
-		read-only: true;
-		font-size: Font.lg;
-		font-weight: 600;
-		text <=> AppState.calc-res;
+			ta := TouchArea {
+				mouse-cursor: ew-resize;
+				enabled: root.enabled;
+
+				moved => {
+					if (self.pressed) {
+						root.input-len = max(
+							100px,
+							min(
+								root.width - bar.width - 100px,
+								root.input-len + self.mouse-x - self.pressed-x
+							)
+						);
+					}
+				}
+			}
+
+			if (root.enabled): Image {
+				source: @image-url("../icons/vertical-dots.svg");
+				colorize: AppState.palette.color-neutral-content;
+			}
+		}
+
+		FieldInput {
+			x: min(bar.x + bar.width, parent.width - 100px);
+			width: max(parent.width - root.input-len - bar.width, 100px);
+			read-only: true;
+			font-size: Font.lg;
+			font-weight: 600;
+			text <=> AppState.calc-res;
+			enabled: root.enabled;
+		}
 	}
 }

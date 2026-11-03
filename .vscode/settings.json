@@ -8,6 +8,6 @@
     "styles": "./ui/styles/index.slint",
     "components": "./ui/components",
     "stores": "./ui/stores",
-    "libs": "./ui/libs",
+    // "libs": "./ui/libs",
   }
 }

@@ -18,91 +18,120 @@ export component AppWindow inherits Window {
 	preferred-height: 400px;
 	default-font-family: "Poppins";
 	default-font-size: Font.base;
+	forward-focus: scope;
 	
 	in-out property <[TabsState]> tabs;
 	in-out property <string> active-tabs: "calc";
-	
-	// fields
-	VerticalBox {
-		// padding: 0px;
-		// spacing: 0px;
-		padding-bottom: 50px;
 
-		if (active-tabs == "calc"): CalcDiff {
-			input-len: parent.width / 2;
-		}
-		// Button {
-		// 	text: "Increase value";
-		// 	clicked => {
-		// 		root.request-increase-value();
-		// 		AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
-		// 		Palette.color-scheme = AppState.palette.is-dark ? dark : light;
-		// 	}
-		// }
-		if (active-tabs == "var"): FieldInput {
-			font-size: Font.lg;
-			text <=> AppState.var;
+	scope := FocusScope {		
+		// fields
+		VerticalBox {
+			// padding: 0px;
+			// spacing: 0px;
+			padding-bottom: 50px;
 
-			edited => {
-				AppLogic.parse-calc();
+			if (active-tabs == "calc"): calc := CalcDiff {
+				input-len: parent.width / 2;
 			}
-		}
-		if (active-tabs == "note"): FieldInput {
-			font-size: Font.lg;
-			text <=> AppState.note;
-		}
-	}
-
-	// tabs
-	VerticalBox {
-		alignment: end;
-		z: 2;
-
-		HorizontalLayout {
-			spacing: 4px;
-
-			TabsGroup {
-				id: "main-nav";
-				state: tabs[0];
-			}
-			ButtonTrigger {
-				bg-color: AppState.palette.color-base-300.darker(0.1);
-				color: AppState.palette.color-base-content;
-				height: 36px;
-				width: 36px;
-				default-padding-x: false;
-				icon: @image-url("icons/cog.svg");
-			}
-		}
-	}
-
-	// toast
-	VerticalBox {
-		alignment: end;
-		z: 1;
-
-		Toast {
-			text <=> AppState.error-msg;
-			variant: "error";
-		}
-
-		states [
-			show when AppState.error-msg != "": {
-				padding-bottom: 50px;
-				opacity: 1;
-
-				in {
-					animate padding-bottom, opacity {
-						duration: 300ms;
-						easing: ease-out-quint;
-					}
+			// Button {
+			// 	text: "Increase value";
+			// 	clicked => {
+			// 		AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
+			// 		Palette.color-scheme = AppState.palette.is-dark ? dark : light;
+			// 	}
+			// }
+			if (active-tabs == "var"): var := FieldInput {
+				font-size: Font.lg;
+				text <=> AppState.var;
+				move-to-last-on-init: true;
+				edited => {
+					AppLogic.parse-calc();
+				}
+				on-init => {
+					self.focus();
 				}
 			}
-			hide when AppState.error-msg == "": {
-				padding-bottom: 40px;
-				opacity: 0;
+			if (active-tabs == "note"): note := FieldInput {
+				font-size: Font.lg;
+				text <=> AppState.note;
+				move-to-last-on-init: true;
+				on-init => {
+					self.focus();
+				}
 			}
-		]
+		}
+
+		// tabs
+		VerticalBox {
+			alignment: end;
+			z: 2;
+
+			HorizontalLayout {
+				spacing: 4px;
+
+				TabsGroup {
+					id: "main-nav";
+					state: tabs[0];
+				}
+				ButtonTrigger {
+					bg-color: AppState.palette.color-base-300.darker(0.1);
+					color: AppState.palette.color-base-content;
+					height: 36px;
+					width: 36px;
+					default-padding-x: false;
+					icon: @image-url("icons/cog.svg");
+				}
+			}
+		}
+
+		// toast
+		VerticalBox {
+			alignment: end;
+			z: 1;
+
+			Toast {
+				text <=> AppState.error-msg;
+				variant: "error";
+			}
+
+			states [
+				show when AppState.error-msg != "": {
+					padding-bottom: 50px;
+					opacity: 1;
+
+					in {
+						animate padding-bottom, opacity {
+							duration: 300ms;
+							easing: ease-out-quint;
+						}
+					}
+				}
+				hide when AppState.error-msg == "": {
+					padding-bottom: 40px;
+					opacity: 0;
+				}
+			]
+		}
+
+	
+		KeyBinding {
+			keys: @keys(Control + "1");
+			activated => {
+				AppLogic.select-tab("main-nav", 0);
+			}
+		}
+		KeyBinding {
+			keys: @keys(Control + "2");
+			activated => {
+				AppLogic.select-tab("main-nav", 1);
+			}
+		}
+		KeyBinding {
+			keys: @keys(Control + "3");
+			activated => {
+				AppLogic.select-tab("main-nav", 2);
+			}
+		}
 	}
 
 	changed width => {

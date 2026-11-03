@@ -3,109 +3,123 @@ import { AppState } from "@stores/app.slint";
 import { Font } from "@styles";
 import { ContextMenu } from "@components/context-menu.slint";
 
-export component FieldInput inherits Rectangle {
-	// private property <bool> mouse-clicked;
+export component FieldInput inherits FocusScope {
 	in-out property <string> text;
 	in property <brush> text-color;
 	in property <length> font-size: Font.base;
 	in property <int> font-weight: 400;
 	in property <bool> read-only: false;
+	in-out property <bool> move-to-last-on-init: false;
 	callback edited();
+	callback on-init();
 
-	background: AppState.palette.color-base-300;
-	border-radius: AppState.palette.radius-field;
-	clip: true;
+	forward-focus: input;
 
-	ScrollView {
-		private property <length> margin: 4px;
-		
-		height: parent.height;
-		width: parent.width;
-		// content-height: input.height;
-		// content-width: input.width;
-		
-		// ta := TouchArea {
-		// 	clicked => {
-		// 		root.mouse-clicked = true;
-		// 	}
-		// }
-
-		input := TextInput {
-			private property <length> previous-cursor-x: 0px;
-			private property <length> previous-cursor-y: 0px;
-
-			x: 4px; y: 4px;
-			color: text-color == transparent ? AppState.palette.color-base-content : text-color;
-			width: max(parent.width, self.preferred-width);
-			height: max(parent.height, self.preferred-height);
-			single-line: false;
-			read-only: root.read-only;
-			font-size: root.font-size;
-			font-weight: root.font-weight;
-			
-			text <=> root.text;
-			
-			cursor-position-changed(cursor-position) => {
-				// if (root.mouse-clicked) {
-				// 	root.mouse-clicked = false;
-				// 	return;
-				// }
-
-				parent.content-width = max(self.width, cursor-position.x) + (cursor-position.x + margin + self.text-cursor-width < parent.width ? 0px : margin + self.text-cursor-width);
-				parent.content-height = max(self.height, cursor-position.y) + (cursor-position.y + margin < parent.height ? 0px : margin);
-				
-				if (cursor-position.x > previous-cursor-x) {
-					if (cursor-position.x + self.x + self.text-cursor-width > parent.width - margin) {
-						parent.content-x = parent.width - cursor-position.x - margin - self.text-cursor-width;
-					}
-				} else if (cursor-position.x < previous-cursor-x) {
-					if (cursor-position.x + parent.content-x < margin) {
-						parent.content-x = margin - cursor-position.x;
-					}
-				}
-				
-				if (cursor-position.y > previous-cursor-y) {
-					if (cursor-position.y + self.y > parent.height - margin) {
-						parent.content-y = parent.height - cursor-position.y - margin - 28px;
-					}
-				} else if (cursor-position.y < previous-cursor-y) {
-					if (cursor-position.y + parent.content-y < margin) {
-						parent.content-y = margin - cursor-position.y;
-					}
-				}
-
-				previous-cursor-x = cursor-position.x;
-				previous-cursor-y = cursor-position.y;
-			}
-
-			edited => {
-				root.edited();
-			}
-		}
-
-		@children
-
-		ContextMenu {
+	Rectangle {
+		background: AppState.palette.color-base-300;
+		border-radius: AppState.palette.radius-field;
+		clip: true;
+	
+		ctx := ContextMenu {
 			entries: [
 				{ title: "Copy" },
 				{ title: "Cut" },
+				{ title: "Paste" },
+				{ title: "---" },
+				{ title: "Select All" },
+				{ title: "Clear" },
 			];
+	
+			item-selected(index) => {
+				if (index == 0) {
+					input.copy();
+				} else if (index == 1) {
+					input.cut();
+				} else if (index == 2) {
+					input.paste();
+				} else if (index == 4) {
+					input.select-all();
+				} else if (index == 5) {
+					input.text = "";
+				}
+			}
 		}
-		// ContextMenuArea {
+	
+		ScrollView {
+			private property <length> margin: 4px;
 			
-		// 	Menu {
-		// 		MenuItem {
-		// 			title: @tr("Copy");
-		// 		}
-		// 		MenuItem {
-		// 			title: "Cut";
-		// 		}
-		// 	}
-		// }
+			height: parent.height;
+			width: parent.width;
+	
+			input := TextInput {
+				private property <length> previous-cursor-x: 0px;
+				private property <length> previous-cursor-y: 0px;
+	
+				x: 4px; y: 4px;
+				color: text-color == transparent ? AppState.palette.color-base-content : text-color;
+				width: max(parent.width, self.preferred-width);
+				height: max(parent.height, self.preferred-height);
+				single-line: false;
+				read-only: root.read-only;
+				font-size: root.font-size;
+				font-weight: root.font-weight;
+				
+				text <=> root.text;
+				
+				cursor-position-changed(cursor-position) => {
+					parent.content-width = max(self.width, cursor-position.x) + (cursor-position.x + margin + self.text-cursor-width < parent.width ? 0px : margin + self.text-cursor-width);
+					parent.content-height = max(self.height, cursor-position.y) + (cursor-position.y + margin < parent.height ? 0px : margin);
+					
+					if (cursor-position.x > previous-cursor-x) {
+						if (cursor-position.x + self.x + self.text-cursor-width > parent.width - margin) {
+							parent.content-x = parent.width - cursor-position.x - margin - self.text-cursor-width;
+						}
+					} else if (cursor-position.x < previous-cursor-x) {
+						if (cursor-position.x + parent.content-x < margin) {
+							parent.content-x = margin - cursor-position.x;
+						}
+					}
+					
+					if (cursor-position.y > previous-cursor-y) {
+						if (cursor-position.y + self.y > parent.height - margin) {
+							parent.content-y = parent.height - cursor-position.y - margin - 28px;
+						}
+					} else if (cursor-position.y < previous-cursor-y) {
+						if (cursor-position.y + parent.content-y < margin) {
+							parent.content-y = margin - cursor-position.y;
+						}
+					}
+	
+					previous-cursor-x = cursor-position.x;
+					previous-cursor-y = cursor-position.y;
+				}
+	
+				edited => {
+					root.edited();
+				}
+	
+				key-pressed(event) => {
+					if (event.text == Key.Escape) {
+						input.clear-focus();
+						return accept;
+					}
+	
+					return reject;
+				}
+			}
+		}
+	
+		animate background {
+			duration: 300ms;
+			easing: ease-out-quint;
+		}
 	}
 
-	animate background {
-		duration: 300ms;
-		easing: ease-out-quint;
+	init => {
+		on-init();
+
+		if (move-to-last-on-init) {
+			input.set-selection-offsets(input.text.character-count, input.text.character-count);
+		}
 	}
 }

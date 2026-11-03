@@ -95,10 +95,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 							let last_pos = last.parse::<usize>().unwrap_or(0);
 							let is_same_pos = first == last;
 
+							let is_calc_input = err.starts_with("calc");
+							let input_err = if is_calc_input { app_state.get_calc_input() } else { app_state.get_var() }
+								.replace(" ", "").replace("\t", "");
+							
 							let get_line = | search_pos: usize | -> i32 {
 								let mut line = 1;
 
-								for (pos, input) in app_state.get_calc_input().chars().enumerate() {
+								for (pos, input) in input_err.chars().enumerate() {
 									if input == '\n' { line += 1; }
 									if pos == search_pos { return line; }
 								}
@@ -113,7 +117,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 								last_line = get_line(last_pos);
 							}
 							
-							app_state.set_error_msg(SharedString::from(format!("Error at {} {}.", 
+							app_state.set_error_msg(SharedString::from(format!("{} error at {} {}.", 
+								if is_calc_input { "Calculation" } else { "Variable" },
 								if is_same_pos { "line" } else { "lines" },
 								if is_same_pos { first_line.to_string() } else { format!("{} - {}", first_line, last_line) }
 							)));
