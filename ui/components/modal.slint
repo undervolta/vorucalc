@@ -3,5 +3,35 @@ import { AppState } from "@stores/app.slint";
 import { Button } from "@components/button.slint";
 
 export component ButtonTrigger inherits Button {
-	
+	callback on-click();
+
+	clicked => {
+		on-click();
+	}
+}
+
+export component Modal inherits PopupWindow {
+	in-out property <string> size: "md";
+	out property <length> modal-width: size == "md" ? 256px : 128px;
+	out property <length> modal-height: size == "md" ? 192px : 96px;
+	out property <length> modal-x: self.width / 2 - modal-width / 2;
+	out property <length> modal-y: self.height / 2 - modal-height / 2;
+
+	close-policy: close-on-click-outside;
+
+	Rectangle {
+		background: black.with-alpha(0.4);
+	}
+
+	content := Rectangle {
+		background: blue;
+		x: root.modal-x;
+		y: root.modal-y;
+		width: root.modal-width;
+		height: root.modal-height;
+
+		Text {
+			text: "Abc";
+		}
+	}
 }
