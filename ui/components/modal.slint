@@ -16,22 +16,50 @@ export component Modal inherits PopupWindow {
 	out property <length> modal-height: size == "md" ? 192px : 96px;
 	out property <length> modal-x: self.width / 2 - modal-width / 2;
 	out property <length> modal-y: self.height / 2 - modal-height / 2;
+	in-out property <length> modal-y-offset: 0px;
+	in-out property <bool> is-closed: false;
 
 	close-policy: close-on-click-outside;
 
 	Rectangle {
+		opacity: root.is-closed ? 0 : 1;
 		background: black.with-alpha(0.4);
+
+		animate opacity {
+			duration: 1000ms;
+			easing: ease-in-out-quad;
+		}
 	}
 
 	content := Rectangle {
-		background: blue;
 		x: root.modal-x;
-		y: root.modal-y;
+		y: root.modal-y + root.modal-y-offset;
 		width: root.modal-width;
 		height: root.modal-height;
+		opacity: root.is-closed ? 0 : 1;
+		background: AppState.palette.color-base-300;
+		border-radius: AppState.palette.radius-box;
+		drop-shadow-offset-y: 4px;
+		drop-shadow-blur: 6px;
+		drop-shadow-color: black.with-alpha(0.7);
 
-		Text {
-			text: "Abc";
+		@children
+
+		animate opacity {
+			duration: 1000ms;
+			easing: ease-in-out-quad;
+		}
+	}
+
+	TouchArea {
+		pointer-event(event) => {
+			if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up && (
+				self.mouse-x < content.x || self.mouse-x > content.x + content.width ||
+				self.mouse-y < content.y || self.mouse-y > content.y + content.height
+			)) {
+				root.is-closed = true;
+				root.close();
+			}
 		}
 	}
 }

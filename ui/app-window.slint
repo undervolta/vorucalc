@@ -139,6 +139,14 @@ export component AppWindow inherits Window {
 		settings := Modal {
 			width: root.width;
 			height: root.height;
+			modal-y-offset: -24px;
+
+			Text {
+				text: "Abc";
+			}
+			Text {
+				text: "Def";
+			}
 		}
 	}
 
