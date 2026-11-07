@@ -1,0 +1,20 @@
+import { AppState } from "@stores/app.slint";
+import { Modal } from "@components/modal.slint";
+
+export component SettingsModal inherits Modal {
+	in property <length> dialog-width;
+	in property <length> dialog-height;
+
+	width: dialog-width;
+	height: dialog-height;
+	modal-y-offset: -24px;
+	size: "custom";
+	modal-width-custom: 240px;
+	modal-height-custom: 180px;
+
+	GridLayout {
+		Row {
+			
+		}
+	}
+}

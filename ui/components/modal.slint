@@ -11,32 +11,43 @@ export component ButtonTrigger inherits Button {
 }
 
 export component Modal inherits PopupWindow {
-	in-out property <string> size: "md";
-	out property <length> modal-width: size == "md" ? 256px : 128px;
-	out property <length> modal-height: size == "md" ? 192px : 96px;
+	in-out property <string> size: "sm";
+	in-out property <length> modal-width-custom;
+	in-out property <length> modal-height-custom;
+	out property <length> modal-width: size == "custom" ? modal-width-custom : size == "full" ? self.width
+										: size == "2xl" ? 1536px : size == "xl" ? 1280px
+										: size == "lg" ? 1024px : size == "md" ? 768px
+										: size == "sm" ? 640px : size == "xs" ? 512px
+										: size == "2xs" ? 384px : 256px;
+	out property <length> modal-height: size == "custom" ? modal-height-custom : size == "full" ? self.height
+										: size == "2xl" ? 1152px : size == "xl" ? 960px
+										: size == "lg" ? 768px : size == "md" ? 576px
+										: size == "sm" ? 480px : size == "xs" ? 384px
+										: size == "2xs" ? 288px : 192px;
 	out property <length> modal-x: self.width / 2 - modal-width / 2;
 	out property <length> modal-y: self.height / 2 - modal-height / 2;
 	in-out property <length> modal-y-offset: 0px;
-	in-out property <bool> is-closed: false;
+	in-out property <bool> is-opening: false;
+	in-out property <bool> is-closing: false;
+	in-out property <bool> has-closed: false;
 
 	close-policy: close-on-click-outside;
 
-	Rectangle {
-		opacity: root.is-closed ? 0 : 1;
+	bg := Rectangle {
+		opacity: 0;
 		background: black.with-alpha(0.4);
 
 		animate opacity {
-			duration: 1000ms;
-			easing: ease-in-out-quad;
+			duration: 500ms;
+			easing: ease-out-quint;
 		}
 	}
 
 	content := Rectangle {
 		x: root.modal-x;
-		y: root.modal-y + root.modal-y-offset;
 		width: root.modal-width;
 		height: root.modal-height;
-		opacity: root.is-closed ? 0 : 1;
+		opacity: 0;
 		background: AppState.palette.color-base-300;
 		border-radius: AppState.palette.radius-box;
 		drop-shadow-offset-y: 4px;
@@ -45,9 +56,18 @@ export component Modal inherits PopupWindow {
 
 		@children
 
-		animate opacity {
-			duration: 1000ms;
-			easing: ease-in-out-quad;
+		states [
+			init when !root.is-opening: {
+				y: root.modal-y + root.modal-y-offset + 12px;
+			}
+			anim-in when root.is-opening: {
+				y: root.modal-y + root.modal-y-offset;
+			}
+		]
+
+		animate opacity, y {
+			duration: 500ms;
+			easing: ease-out-quint;
 		}
 	}
 
@@ -57,7 +77,27 @@ export component Modal inherits PopupWindow {
 				self.mouse-x < content.x || self.mouse-x > content.x + content.width ||
 				self.mouse-y < content.y || self.mouse-y > content.y + content.height
 			)) {
-				root.is-closed = true;
+				root.is-closing = true;
+				bg.opacity = 0;
+				content.opacity = 0;
+				timer.interval = 500ms;
+				timer.running = true;
+			}
+		}
+	}
+
+	timer := Timer {
+		interval: 10ms;
+
+		triggered => {
+			self.running = false;
+
+			if (!root.is-opening) {
+				root.is-opening = true;
+
+				bg.opacity = 1;
+				content.opacity = 1;
+			} else if (root.is-closing) {
 				root.close();
 			}
 		}

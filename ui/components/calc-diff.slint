@@ -1,9 +1,15 @@
 import { FieldInput } from "@components/text-edit.slint";
-import { AppState, AppLogic } from "@stores/app.slint";
+import { AppState, AppLogic, SemanticSize } from "@stores/app.slint";
 import { Font } from "@styles";
 
 export component CalcDiff inherits FocusScope {
 	in-out property <length> input-len;
+	out property <length> font-size: AppState.user-settings.font-size.value == SemanticSize.xs ? Font.xs
+							: AppState.user-settings.font-size.value == SemanticSize.sm ? Font.sm
+							: AppState.user-settings.font-size.value == SemanticSize.md ? Font.base
+							: AppState.user-settings.font-size.value == SemanticSize.lg ? Font.lg
+							: AppState.user-settings.font-size.value == SemanticSize.xl ? Font.xl
+							: AppState.user-settings.font-size.value == SemanticSize.xxl ? Font.x2l : Font.base;
 	
 	forward-focus: input;
 
@@ -13,7 +19,7 @@ export component CalcDiff inherits FocusScope {
 		input := FieldInput {
 			x: 0;
 			width: max(root.input-len, 100px);
-			font-size: Font.lg;
+			font-size: root.font-size;
 			text <=> AppState.calc-input;
 			enabled: root.enabled;
 			move-to-last-on-init: true;
@@ -58,7 +64,7 @@ export component CalcDiff inherits FocusScope {
 			x: min(bar.x + bar.width, parent.width - 100px);
 			width: max(parent.width - root.input-len - bar.width, 100px);
 			read-only: true;
-			font-size: Font.lg;
+			font-size: root.font-size;
 			font-weight: 600;
 			text <=> AppState.calc-res;
 			enabled: root.enabled;

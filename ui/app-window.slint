@@ -2,10 +2,11 @@ import { Button, VerticalBox, Palette } from "std-widgets.slint";
 import { Font, Theme, Breakpoint } from "@styles";
 import { AppState, AppLogic, TabsState } from "@stores/app.slint";
 import { TabsGroup, Tabs } from "@components/tabs.slint";
-import { ButtonTrigger, Modal } from "@components/modal.slint";
+import { ButtonTrigger } from "@components/modal.slint";
 import { FieldInput } from "@components/text-edit.slint";
-import { CalcDiff } from "@components/calc-diff.slint";
 import { Toast } from "@components/toast.slint";
+import { CalcDiff } from "@components/calc-diff.slint";
+import { SettingsModal } from "@components/settings-modal.slint";
 
 import "./fonts/poppins.medium.ttf";
 import "./fonts/poppins.semibold.ttf";
@@ -13,7 +14,13 @@ import "./fonts/poppins.semibold.ttf";
 export { AppState, AppLogic } from "@stores/app.slint";
 
 export component AppWindow inherits Window {
+	title: "VoruCalc";
+	// icon: @image-url("assets/icon.png");
+	// background: transparent;
+	// no-frame: true;
+	// resize-border-width: 2px;
 	min-width: 240px;
+	min-height: 144px;
 	preferred-width: 300px;
 	preferred-height: 400px;
 	default-font-family: "Poppins";
@@ -23,7 +30,7 @@ export component AppWindow inherits Window {
 	in-out property <[TabsState]> tabs;
 	in-out property <string> active-tabs: "calc";
 
-	scope := FocusScope {		
+	scope := FocusScope {
 		// fields
 		VerticalBox {
 			// padding: 0px;
@@ -115,7 +122,6 @@ export component AppWindow inherits Window {
 				}
 			]
 		}
-
 	
 		KeyBinding {
 			keys: @keys(Control + "1");
@@ -136,20 +142,11 @@ export component AppWindow inherits Window {
 			}
 		}
 
-		settings := Modal {
-			width: root.width;
-			height: root.height;
-			modal-y-offset: -24px;
-
-			Text {
-				text: "Abc";
-			}
-			Text {
-				text: "Def";
-			}
+		settings := SettingsModal {
+			dialog-width: root.width;
+			dialog-height: root.height;
 		}
 	}
-
 
 	changed width => {
 		AppState.screen-width = self.width;

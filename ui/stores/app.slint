@@ -14,6 +14,26 @@ export struct TabsState {
 	tabs: [TabsType]
 }
 
+export enum SemanticSize {
+	xxs,
+	xs,
+	sm,
+	md,
+	lg,
+	xl,
+	xxl
+}
+
+export struct UserSettings {
+	dark-mode: { title: string, value: bool },
+	show-err-msg: { title: string, value: bool },
+	save-on-close: { title: string, value: bool },
+	decimal-prec: { title: string, desc: string, value: int },
+	decimal-separator: { title: string, desc: string, value: string },
+	digit-separator: { title: string, desc: string, value: string },
+	font-size: { title: string, value: SemanticSize },
+}
+
 export global AppState {
 	in-out property <int> selected-theme: 1;	// index
 	out property <ThemePalette> palette: Theme.list[selected-theme];
@@ -24,6 +44,7 @@ export global AppState {
 	in-out property <string> var;
 	in-out property <string> note;
 	in-out property <string> error-msg;
+	in-out property <UserSettings> user-settings;
 }
 
 export global AppLogic {

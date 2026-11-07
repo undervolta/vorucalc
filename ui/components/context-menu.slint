@@ -42,9 +42,7 @@ export component ContextMenu inherits Rectangle {
 	popup := PopupWindow {
 		x: root.popup-x;
 		y: root.popup-y;
-		width: root.menu-width + 4px;
-		// height: (root.entries.length * root.item-height) + (root.entries.length - 1) * 2px + 8px;
-		
+		width: root.menu-width + 4px;		
 		close-policy: close-on-click-outside;
 		
 		content := Rectangle {

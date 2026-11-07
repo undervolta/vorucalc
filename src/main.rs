@@ -11,6 +11,7 @@ slint::include_modules!();
 
 mod components;
 mod lang;
+mod stores;
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let app = AppWindow::new()?;
@@ -20,6 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let tabs = components::tabs::get_app_tabs();
 
 	app.set_tabs(tabs.clone());
+	state.set_user_settings(stores::app::get_user_settings());
 
 	let app_handle = app.as_weak();
 	logic.on_load_image(move |path| {

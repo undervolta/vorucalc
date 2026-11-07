@@ -10,6 +10,8 @@ export component FieldInput inherits FocusScope {
 	in property <int> font-weight: 400;
 	in property <bool> read-only: false;
 	in-out property <bool> move-to-last-on-init: false;
+	in-out property <bool> single-line: false;
+	in-out property <InputType> type: InputType.text;
 	callback edited();
 	callback on-init();
 
@@ -59,7 +61,8 @@ export component FieldInput inherits FocusScope {
 				color: text-color == transparent ? AppState.palette.color-base-content : text-color;
 				width: max(parent.width, self.preferred-width);
 				height: max(parent.height, self.preferred-height);
-				single-line: false;
+				single-line: root.single-line;
+				input-type: root.type;
 				read-only: root.read-only;
 				font-size: root.font-size;
 				font-weight: root.font-weight;
