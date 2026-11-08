@@ -1,4 +1,4 @@
-import { Button, VerticalBox, Palette } from "std-widgets.slint";
+import { VerticalBox } from "std-widgets.slint";
 import { Font, Theme, Breakpoint } from "@styles";
 import { AppState, AppLogic, TabsState } from "@stores/app.slint";
 import { TabsGroup, Tabs } from "@components/tabs.slint";
@@ -16,7 +16,7 @@ export { AppState, AppLogic } from "@stores/app.slint";
 export component AppWindow inherits Window {
 	title: "VoruCalc";
 	// icon: @image-url("assets/icon.png");
-	// background: transparent;
+	background: AppState.palette.color-base-300;
 	// no-frame: true;
 	// resize-border-width: 2px;
 	min-width: 240px;
@@ -81,7 +81,7 @@ export component AppWindow inherits Window {
 					state: tabs[0];
 				}
 				ButtonTrigger {
-					bg-color: AppState.palette.color-base-300.darker(0.1);
+					bg-color: AppState.palette.color-base-200.darker(0.1);
 					color: AppState.palette.color-base-content;
 					height: 36px;
 					width: 36px;
@@ -139,6 +139,12 @@ export component AppWindow inherits Window {
 			keys: @keys(Control + "3");
 			activated => {
 				AppLogic.select-tab("main-nav", 2);
+			}
+		}
+		KeyBinding {
+			keys: @keys(Control + ",");
+			activated => {
+				settings.show();
 			}
 		}
 

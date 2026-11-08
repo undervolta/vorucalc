@@ -1,9 +1,47 @@
 import { AppState } from "@stores/app.slint";
 import { Modal } from "@components/modal.slint";
+import { Switch } from "@components/switch.slint";
+import { LineInput } from "@components/line-edit.slint";
+import { ListView, Palette } from "std-widgets.slint";
+
+component Label inherits Text {
+	in property <string> title;
+	in property <string> desc;
+
+	text: title;
+	horizontal-alignment: left;
+	vertical-alignment: center;
+}
+
+component Input inherits LineInput {
+	bg-color: AppState.palette.color-base-200;
+	width: 96px;
+}
+
+struct SettingsOption {
+	label: string,
+	desc: string,
+	checked: bool,
+	text: string,
+	type: int,		// 1 = switch, 2 = input str, 3 = input num, 4 = dropdown
+}
+
 
 export component SettingsModal inherits Modal {
 	in property <length> dialog-width;
 	in property <length> dialog-height;
+	out property <[SettingsOption]> settings: [
+		{ type: 1, label: AppState.user-settings.dark-mode.title, desc: "", checked: AppState.user-settings.dark-mode.value },
+
+	];
+
+	function set-settings(index: int) {
+		if (index == 0) {
+			AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
+			AppState.user-settings.dark-mode.value = AppState.palette.is-dark;
+			Palette.color-scheme = AppState.palette.is-dark ? dark : light;
+		}
+	}
 
 	width: dialog-width;
 	height: dialog-height;
@@ -12,9 +50,20 @@ export component SettingsModal inherits Modal {
 	modal-width-custom: 240px;
 	modal-height-custom: 180px;
 
-	GridLayout {
-		Row {
-			
+	VerticalLayout {
+		padding: 12px; padding-right: 0px;
+
+		ListView {
+			for option[idx] in settings: HorizontalLayout {
+				padding-right: 16px; padding-top: 4px; padding-bottom: 4px;
+	
+				Label { title: option.label; }
+				
+				if (option.type == 1): Switch {
+					checked: option.checked;
+					toggled => { root.set-settings(idx); }
+				}
+			}
 		}
 	}
 }

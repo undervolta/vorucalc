@@ -43,6 +43,21 @@ export component Modal inherits PopupWindow {
 		}
 	}
 
+	TouchArea {
+		pointer-event(event) => {
+			if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up && (
+				self.mouse-x < content.x || self.mouse-x > content.x + content.width ||
+				self.mouse-y < content.y || self.mouse-y > content.y + content.height
+			)) {
+				root.is-closing = true;
+				bg.opacity = 0;
+				content.opacity = 0;
+				timer.interval = 500ms;
+				timer.running = true;
+			}
+		}
+	}
+
 	content := Rectangle {
 		x: root.modal-x;
 		width: root.modal-width;
@@ -68,21 +83,6 @@ export component Modal inherits PopupWindow {
 		animate opacity, y {
 			duration: 500ms;
 			easing: ease-out-quint;
-		}
-	}
-
-	TouchArea {
-		pointer-event(event) => {
-			if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up && (
-				self.mouse-x < content.x || self.mouse-x > content.x + content.width ||
-				self.mouse-y < content.y || self.mouse-y > content.y + content.height
-			)) {
-				root.is-closing = true;
-				bg.opacity = 0;
-				content.opacity = 0;
-				timer.interval = 500ms;
-				timer.running = true;
-			}
 		}
 	}
 

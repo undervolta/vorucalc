@@ -83,8 +83,11 @@ pub fn parse_calc(calc_input: SharedString, var_input: SharedString) -> Result<S
 		}
 	}
 
-	Ok(SharedString::from(env.iter().enumerate()
-		.map(|(idx, _)| format!("{}\n", env.get(&((idx + 1) as i64)).unwrap_or(&Value::Invalid)))
+	let env_iter = env.iter().enumerate();
+	let env_len = env_iter.len();
+	
+	Ok(SharedString::from(env_iter
+		.map(|(idx, _)| format!("{}{}", env.get(&((idx + 1) as i64)).unwrap_or(&Value::Invalid), if idx < env_len - 1 { "\n" } else { "" }))
 		.collect::<String>()
 	))
 }

@@ -1,0 +1,167 @@
+import { AppState } from "../stores/app.slint";
+
+export component Switch inherits Rectangle {
+	in-out property <bool> checked: false;
+	in property <bool> enabled: true;
+	in property <string> text: "";
+	out property <bool> has-focus: focus-scope.has-focus;
+	callback toggled;
+	// callback delayed-toggle;
+
+	in property <length> switch-width: 40px;
+	in property <length> switch-height: 20px;
+	in property <length> thumb-size: 12px;
+	in property <length> spacing: 12px;
+
+	in property <color> track-on: AppState.palette.color-primary;
+	in property <color> track-off: AppState.palette.color-neutral;
+	in property <color> track-hover: checked ? AppState.palette.color-primary.darker(0.2) : AppState.palette.color-primary.darker(0.9);
+	in property <color> track-pressed: AppState.palette.color-primary.with-alpha(0.5);
+	in property <color> thumb-on: AppState.palette.color-primary-content;
+	in property <color> thumb-off: AppState.palette.color-neutral-content;
+	in property <color> thumb-disabled: AppState.palette.color-neutral.with-alpha(0.5);
+	in property <color> text-color: AppState.palette.color-neutral;
+	in property <color> disabled-text-color: AppState.palette.color-neutral.with-alpha(0.5);
+	in property <color> focus-color: AppState.palette.color-primary.brighter(0.2);
+	in property <duration> animation-duration: 150ms;
+
+	private property <bool> hovered: touch-area.has-hover;
+	private property <bool> pressed: touch-area.pressed;
+
+	function toggle-checked() {
+		if (!root.enabled) {
+			return;
+		}
+
+		root.checked = !root.checked;
+		root.toggled();
+		// timer.running = true;
+	}
+
+	min-width: layout.min-width;
+	min-height: layout.min-height;
+	horizontal-stretch: 0;
+	vertical-stretch: 0;
+
+	accessible-enabled: root.enabled;
+	accessible-label: root.text;
+	accessible-checkable: true;
+	accessible-checked <=> root.checked;
+	accessible-role: switch;
+
+	accessible-action-default => {
+		root.toggle-checked();
+	}
+
+	forward-focus: focus-scope;
+
+	layout := HorizontalLayout {
+		spacing: root.spacing;
+
+		VerticalLayout {
+			alignment: center;
+
+			Rectangle {
+				width: root.switch-width;
+				height: root.switch-height;
+
+				rail := Rectangle {
+					width: parent.width;
+					height: parent.height;
+					border-radius: self.height / 2;
+
+					background: !root.enabled
+						? (root.checked ? AppState.palette.color-primary : AppState.palette.color-neutral)
+						: root.checked
+							? (root.pressed ? root.track-pressed : root.hovered ? root.track-hover : root.track-on)
+							: (root.pressed ? root.track-pressed : root.hovered ? root.track-hover : root.track-off);
+
+					animate background {
+						duration: root.animation-duration;
+					}
+				}
+
+				thumb := Rectangle {
+					width: root.thumb-size;
+					height: root.thumb-size;
+
+					x: root.checked
+						? parent.width - self.width - 4px
+						: 4px;
+
+					y: (parent.height - self.height) / 2;
+
+					border-radius: self.height / 2;
+
+					background: !root.enabled
+						? root.thumb-disabled
+						: root.checked
+							? root.thumb-on
+							: root.thumb-off;
+
+					animate x, width, background {
+						duration: root.animation-duration;
+						easing: ease;
+					}
+				}
+
+				// Focus indicator
+				if root.has-focus && root.enabled: Rectangle {
+					x: -3px;
+					y: -3px;
+					width: parent.width + 6px;
+					height: parent.height + 6px;
+
+					background: transparent;
+					border-width: 2px;
+					border-color: root.focus-color;
+					border-radius: parent.height / 2 + 3px;
+				}
+
+				touch-area := TouchArea {
+					enabled: root.enabled;
+			
+					clicked => {
+						root.toggle-checked();
+					}
+				}
+			}
+		}
+
+		if root.text != "": Text {
+			text: root.text;
+
+			color: root.enabled
+				? root.text-color
+				: root.disabled-text-color;
+
+			vertical-alignment: center;
+			horizontal-alignment: left;
+		}
+	}
+
+
+	focus-scope := FocusScope {
+		x: 0;
+		width: 0px;
+		enabled: root.enabled;
+
+		key-pressed(event) => {
+			if (event.text == " " || event.text == "\n") {
+				root.toggle-checked();
+				return accept;
+			}
+
+			return reject;
+		}
+	}
+
+	// timer := Timer {
+	// 	interval: 150ms;
+	// 	running: false;
+	// 	triggered => {
+	// 		self.running = false;
+	// 		root.delayed-toggle();
+	// 	}
+	// }
+}

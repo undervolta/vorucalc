@@ -24,11 +24,10 @@ export component CalcDiff inherits FocusScope {
 			enabled: root.enabled;
 			move-to-last-on-init: true;
 
-			edited => {
-				AppLogic.parse-calc();
-			}
-			on-init => {
-				self.focus();
+			edited => { AppLogic.parse-calc(); }
+			on-init => { self.focus(); }
+			on-scroll => {
+				output.scroll-y = self.scroll-y;
 			}
 		}
 
@@ -60,7 +59,7 @@ export component CalcDiff inherits FocusScope {
 			}
 		}
 
-		FieldInput {
+		output := FieldInput {
 			x: min(bar.x + bar.width, parent.width - 100px);
 			width: max(parent.width - root.input-len - bar.width, 100px);
 			read-only: true;

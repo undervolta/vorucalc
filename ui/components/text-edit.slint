@@ -5,6 +5,7 @@ import { ContextMenu } from "@components/context-menu.slint";
 
 export component FieldInput inherits FocusScope {
 	in-out property <string> text;
+	in property <brush> bg-color;
 	in property <brush> text-color;
 	in property <length> font-size: Font.base;
 	in property <int> font-weight: 400;
@@ -12,13 +13,15 @@ export component FieldInput inherits FocusScope {
 	in-out property <bool> move-to-last-on-init: false;
 	in-out property <bool> single-line: false;
 	in-out property <InputType> type: InputType.text;
+	in-out property <length> scroll-y;
 	callback edited();
 	callback on-init();
+	callback on-scroll();
 
 	forward-focus: input;
 
 	Rectangle {
-		background: AppState.palette.color-base-300;
+		background: root.bg-color == transparent ? AppState.palette.color-base-200 : root.bg-color;
 		border-radius: AppState.palette.radius-field;
 		clip: true;
 	
@@ -46,12 +49,13 @@ export component FieldInput inherits FocusScope {
 				}
 			}
 		}
-	
+		
 		ScrollView {
 			private property <length> margin: 4px;
 			
 			height: parent.height;
 			width: parent.width;
+			content-y: root.scroll-y == 0px ? 0px : root.scroll-y;
 	
 			input := TextInput {
 				private property <length> previous-cursor-x: 0px;
@@ -109,6 +113,11 @@ export component FieldInput inherits FocusScope {
 	
 					return reject;
 				}
+			}
+
+			scrolled => {
+				root.scroll-y = self.content-y;
+				root.on-scroll();
 			}
 		}
 	
