@@ -55,6 +55,14 @@ fn main() -> Result<(), Box<dyn Error>> {
 			None => StyledText::default()
 		}
 	});
+
+	let state_handle = state.as_weak();
+	logic.on_save_settings(move || {
+		// if let Some(ui) = app_handle.upgrade() {}
+		if let Some(app_state) = state_handle.upgrade() {
+			stores::app::save_user_settings(app_state.get_user_settings());
+		}
+	});
 	
 	let state_handle = state.as_weak();
 	logic.on_parse_calc(move || {
@@ -65,7 +73,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 						app_state.set_error_msg(SharedString::new());
 					} else {
 						let lines = res.split("\n").collect::<Vec<&str>>();
-						let lines_len = lines.len() - 1;
+						let lines_len = lines.len();
 
 						let err_lines = lines.into_iter().enumerate().fold(String::new(), |mut acc, (idx, line)| {
 							if line.contains("?") {

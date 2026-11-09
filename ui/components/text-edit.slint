@@ -10,6 +10,7 @@ export component FieldInput inherits FocusScope {
 	in property <length> font-size: Font.base;
 	in property <int> font-weight: 400;
 	in property <bool> read-only: false;
+	in property <ScrollBarPolicy> show-scroll: ScrollBarPolicy.as-needed;
 	in-out property <bool> move-to-last-on-init: false;
 	in-out property <bool> single-line: false;
 	in-out property <InputType> type: InputType.text;
@@ -56,6 +57,8 @@ export component FieldInput inherits FocusScope {
 			height: parent.height;
 			width: parent.width;
 			content-y: root.scroll-y == 0px ? 0px : root.scroll-y;
+			vertical-scrollbar-policy: root.show-scroll;
+			horizontal-scrollbar-policy: root.show-scroll;
 	
 			input := TextInput {
 				private property <length> previous-cursor-x: 0px;

@@ -1,21 +1,39 @@
-import { AppState } from "@stores/app.slint";
+import { AppState, AppLogic, SemanticSize } from "@stores/app.slint";
 import { Modal } from "@components/modal.slint";
 import { Switch } from "@components/switch.slint";
 import { LineInput } from "@components/line-edit.slint";
+import { Dropdown } from "@components/dropdown.slint";
 import { ListView, Palette } from "std-widgets.slint";
+import { Font } from "@styles";
 
-component Label inherits Text {
+component Label inherits VerticalLayout {
 	in property <string> title;
 	in property <string> desc;
 
-	text: title;
-	horizontal-alignment: left;
-	vertical-alignment: center;
+	max-width: 192px;
+
+	label := Text {
+		text: root.title;
+		horizontal-alignment: left;
+		// vertical-alignment: center;
+		color: AppState.palette.color-base-content;
+		wrap: word-wrap;
+	}
+	
+	// if (desc != ""): Text {
+	// 	text: root.desc;
+	// 	horizontal-alignment: left;
+	// 	font-size: Font.xs;
+	// 	wrap: word-wrap;
+	// 	color: AppState.palette.color-base-content.with-alpha(0.5);
+	// }
 }
 
 component Input inherits LineInput {
 	bg-color: AppState.palette.color-base-200;
-	width: 96px;
+	width: 48px;
+	custom-height: 32px;
+	show-scroll: ScrollBarPolicy.always-off;
 }
 
 struct SettingsOption {
@@ -23,24 +41,61 @@ struct SettingsOption {
 	desc: string,
 	checked: bool,
 	text: string,
-	type: int,		// 1 = switch, 2 = input str, 3 = input num, 4 = dropdown
+	size: SemanticSize,
+	size-model: [{ label: string, value: SemanticSize }],
+	type: int,		// 1 = switch, 2 = input, 3 = dropdown (SemanticSize)
 }
 
 
 export component SettingsModal inherits Modal {
 	in property <length> dialog-width;
 	in property <length> dialog-height;
-	out property <[SettingsOption]> settings: [
+	in-out property <[SettingsOption]> settings: [
 		{ type: 1, label: AppState.user-settings.dark-mode.title, desc: "", checked: AppState.user-settings.dark-mode.value },
-
+		{ type: 1, label: AppState.user-settings.show-err-msg.title, checked: AppState.user-settings.show-err-msg.value },
+		{ type: 1, label: AppState.user-settings.save-on-close.title, checked: AppState.user-settings.save-on-close.value },
+		{ type: 3, label: AppState.user-settings.decimal-prec.title, desc: AppState.user-settings.decimal-prec.desc, text: AppState.user-settings.decimal-prec.value },
+		{ type: 2, label: AppState.user-settings.decimal-separator.title, desc: AppState.user-settings.decimal-separator.desc, text: AppState.user-settings.decimal-separator.value },
+		{ type: 2, label: AppState.user-settings.digit-separator.title, desc: AppState.user-settings.digit-separator.desc, text: AppState.user-settings.digit-separator.value },
+		{ type: 4, label: AppState.user-settings.font-size.title, size: AppState.user-settings.font-size.value, size-model: [
+			{ label: "Extra Small", value: SemanticSize.xs }, { label: "Small", value: SemanticSize.sm }, { label: "Medium", value: SemanticSize.md }, 
+			{ label: "Large", value: SemanticSize.lg }, { label: "Extra Large", value: SemanticSize.xl }, { label: "X-Extra Large", value: SemanticSize.xxl }
+		] },
 	];
 
-	function set-settings(index: int) {
-		if (index == 0) {
-			AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
-			AppState.user-settings.dark-mode.value = AppState.palette.is-dark;
-			Palette.color-scheme = AppState.palette.is-dark ? dark : light;
+	function set-settings-toggle(index: int) {
+		// if (index == 0) {
+		// 	AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
+		// 	AppState.user-settings.dark-mode.value = AppState.palette.is-dark;
+		// 	Palette.color-scheme = AppState.palette.is-dark ? dark : light;
+		// } else if (index == 1) {
+		// 	AppState.user-settings.show-err-msg.value = !AppState.user-settings.show-err-msg.value;
+		// } else if (index == 2) {
+		// 	AppState.user-settings.save-on-close.value = !AppState.user-settings.save-on-close.value;
+		// }
+		
+		settings[index].checked = !settings[index].checked;
+		AppLogic.save-settings();
+	}
+
+	function set-settings-input-str(index: int, text: string) {
+		if (index == 3) {
+			AppState.user-settings.decimal-prec.value = text;
+		} else if (index == 4) {
+			AppState.user-settings.decimal-separator.value = text;
+		} else if (index == 5) {
+			AppState.user-settings.digit-separator.value = text;
 		}
+
+		AppLogic.save-settings();
+	}
+
+	function set-settings-dropdown-size(index: int, size: SemanticSize) {
+		if (index == 6) {
+			AppState.user-settings.font-size.value = size;
+		}
+
+		AppLogic.save-settings();
 	}
 
 	width: dialog-width;
@@ -61,9 +116,18 @@ export component SettingsModal inherits Modal {
 				
 				if (option.type == 1): Switch {
 					checked: option.checked;
-					toggled => { root.set-settings(idx); }
+					toggled => { root.set-settings-toggle(idx); }
 				}
+				if (option.type == 2 || option.type == 3): Input {
+					text: option.text;
+					type: option.type == 3 ? InputType.number : InputType.text;
+
+					// edited => { 
+					// 	root.set-settings-input-str(idx, self.text); 
+					// }
+				} 
 			}
 		}
 	}
+	
 }

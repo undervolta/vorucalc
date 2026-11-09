@@ -33,20 +33,11 @@ export component AppWindow inherits Window {
 	scope := FocusScope {
 		// fields
 		VerticalBox {
-			// padding: 0px;
-			// spacing: 0px;
 			padding-bottom: 50px;
 
 			if (active-tabs == "calc"): calc := CalcDiff {
 				input-len: parent.width / 2;
 			}
-			// Button {
-			// 	text: "Increase value";
-			// 	clicked => {
-			// 		AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
-			// 		Palette.color-scheme = AppState.palette.is-dark ? dark : light;
-			// 	}
-			// }
 			if (active-tabs == "var"): var := FieldInput {
 				font-size: Font.lg;
 				text <=> AppState.var;

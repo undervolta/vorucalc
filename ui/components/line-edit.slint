@@ -1,6 +1,8 @@
 import { FieldInput } from "@components/text-edit.slint";
 
 export component LineInput inherits FieldInput {
-	height: 36px;
+	in property <length> custom-height: 36px;
+
+	height: custom-height;
 	single-line: true;
 }

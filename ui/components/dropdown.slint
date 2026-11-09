@@ -1,0 +1,147 @@
+import { AppState } from "@stores/app.slint";
+import { ListView } from "std-widgets.slint";
+import { Font } from "@styles";
+
+export component Dropdown {
+	in property <[string]> model: [];
+	in-out property <int> current-index: -1;
+	out property <string> current-value: current-index >= 0 && current-index < model.length ? model[current-index] : "";
+	in property <bool> enabled: true;
+	in property <length> item-height: 36px;
+	in property <length> max-popup-height: 216px;
+
+	in property <color> dropdown-bg: AppState.palette.color-base-200;
+	in property <color> dropdown-fg: AppState.palette.color-base-content;
+	in property <color> dropdown-border: AppState.palette.color-base-content.with-alpha(0.1);
+	in property <color> selected-bg-color: AppState.palette.color-primary;
+	in property <color> selected-text-color: AppState.palette.color-primary-content;
+	in property <color> popup-background: AppState.palette.color-base-300;
+
+	in property <length> border-radius: AppState.palette.radius-selector;
+	in property <length> border-width: 1px;
+	in property <length> padding-horizontal: 12px;
+	in property <length> font-size: Font.base;
+
+	callback selected(string);
+
+	property <bool> hovered: false;
+	property <int> visible-items: min(model.length, max(1, max-popup-height / item-height));
+	property <length> actual-popup-height: visible-items * item-height;
+
+	function choose(index: int) {
+		if (index >= 0 && index < model.length) {
+			root.current-index = index;
+			root.selected(model[index]);
+			popup.close();
+		}
+	}
+
+
+	Rectangle {
+		min-height: 32px;
+		border-radius: root.border-radius;
+		border-width: root.border-width;
+		border-color: root.dropdown-border;
+		background: root.dropdown-bg;
+
+		animate background {
+			duration: 120ms;
+		}
+
+		HorizontalLayout {
+			padding-left: root.padding-horizontal;
+			padding-right: root.padding-horizontal;
+			spacing: 8px;
+
+			Text {
+				text: root.current-value;
+				color: root.dropdown-fg;
+				font-size: root.font-size;
+
+				vertical-alignment: center;
+				horizontal-alignment: left;
+				overflow: elide;
+
+				horizontal-stretch: 1;
+			}
+
+			Image {
+				source: @image-url("../icons/chevron-right.svg");
+				colorize: root.dropdown-fg;
+				transform-rotation: popup.is-open ? -90deg : 90deg;
+
+				animate transform-rotation {
+					duration: 150ms;
+					easing: ease-out-quint;
+				}
+			}
+		}
+
+		TouchArea {
+			enabled: root.enabled;
+			mouse-cursor: pointer;
+
+			clicked => {
+				if (popup.is-open) { popup.close(); } 
+				else { popup.show(); }
+			}
+		}
+	}
+
+	popup := PopupWindow {
+		y: root.height + 4px;
+
+		width: root.width;
+		height: root.actual-popup-height;
+
+		close-policy: close-on-click-outside;
+
+		Rectangle {
+			background: root.popup-background;
+			border-radius: root.border-radius;
+			border-width: root.border-width;
+			border-color: root.dropdown-border;
+
+			clip: true;
+
+			ListView {
+				width: parent.width;
+				height: parent.height;
+
+				content-height:
+					root.model.length * root.item-height;
+
+				content-width: self.width;
+
+				for value[index] in root.model: Rectangle {
+					x: 0px;
+					y: index * root.item-height;
+
+					width: parent.width;
+					height: root.item-height;
+
+					background: item-area.has-hover
+						? (index == root.current-index ? root.selected-bg-color.darker(0.2) : root.popup-background.brighter(0.5))
+						: (index == root.current-index ? root.selected-bg-color : root.popup-background);
+
+					Text {
+						x: root.padding-horizontal;
+						width: parent.width - 2 * root.padding-horizontal;
+						height: parent.height;
+						text: value;
+						color: root.current-index == index ? AppState.palette.color-primary-content : root.dropdown-fg;
+						font-size: root.font-size;
+						vertical-alignment: center;
+						overflow: elide;
+					}
+
+					item-area := TouchArea {
+						mouse-cursor: pointer;
+
+						clicked => { root.choose(index); }
+					}
+				}
+			}
+		}
+	}
+}
