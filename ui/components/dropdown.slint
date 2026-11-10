@@ -1,4 +1,4 @@
-import { AppState } from "@stores/app.slint";
+import { AppState, SemanticSize } from "@stores/app.slint";
 import { ListView } from "std-widgets.slint";
 import { Font } from "@styles";
 
@@ -137,7 +137,6 @@ export component Dropdown {
 
 					item-area := TouchArea {
 						mouse-cursor: pointer;
-
 						clicked => { root.choose(index); }
 					}
 				}

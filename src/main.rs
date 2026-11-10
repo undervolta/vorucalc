@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 	app.set_tabs(tabs.clone());
 	state.set_user_settings(stores::app::get_user_settings());
-
+	
 	let app_handle = app.as_weak();
 	logic.on_load_image(move |path| {
 		if let Some(_) = app_handle.upgrade() {
@@ -57,10 +57,12 @@ fn main() -> Result<(), Box<dyn Error>> {
 	});
 
 	let state_handle = state.as_weak();
-	logic.on_save_settings(move || {
-		// if let Some(ui) = app_handle.upgrade() {}
+	let palette_handle = app.global::<Palette>().as_weak();
+	logic.on_save_settings(move |current_settings| {
 		if let Some(app_state) = state_handle.upgrade() {
-			stores::app::save_user_settings(app_state.get_user_settings());
+			if let Some(palette) = palette_handle.upgrade() {
+				stores::app::save_user_settings(current_settings, &app_state, &palette);
+			}
 		}
 	});
 	

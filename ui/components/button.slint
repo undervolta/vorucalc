@@ -1,4 +1,14 @@
 import { AppState } from "@stores/app.slint";
+import { Font } from "@styles";
+
+export struct ButtonProps {
+	type: string,
+	text: string,
+	icon: image,
+	color: brush,
+	bg-color: brush,
+	padding-x: length,
+}
 
 export component Button {
 	in property <string> text;
@@ -6,39 +16,47 @@ export component Button {
 	in property <image> icon;
 	in property <brush> color;
 	in property <brush> bg-color;
-	in property <length> padding-x;
+	in property <length> padding-x: -1px;
+	in property <length> font-size: Font.base;
 	in property <bool> default-padding-x: true;
+	in property <bool> is-ghost: false;
 	callback clicked();
 
+	preferred-width: 80px;
+	preferred-height: 32px;
+
 	Rectangle {
+		y: ta.pressed ? 2px : 0px;
 		border-radius: AppState.palette.radius-box;
-		background: (bg-color != transparent ? bg-color 
-			: type == "primary" ? AppState.palette.color-secondary
-			: type == "secondary" ? AppState.palette.color-secondary
-			: type == "accent" ? AppState.palette.color-accent
-			: type == "info" ? AppState.palette.color-info
-			: type == "success" ? AppState.palette.color-success
-			: type == "warning" ? AppState.palette.color-warning
-			: type == "error" ? AppState.palette.color-error
-			: AppState.palette.color-neutral)
+		background: (root.is-ghost ? transparent 
+			: bg-color != transparent ? bg-color 
+				: type == "primary" ? AppState.palette.color-secondary
+				: type == "secondary" ? AppState.palette.color-secondary
+				: type == "accent" ? AppState.palette.color-accent
+				: type == "info" ? AppState.palette.color-info
+				: type == "success" ? AppState.palette.color-success
+				: type == "warning" ? AppState.palette.color-warning
+				: type == "error" ? AppState.palette.color-error
+				: AppState.palette.color-neutral)
 			.mix(AppState.palette.is-dark ? Colors.white : Colors.black, ta.has-hover ? 0.8 : 1)
 			.darker(ta.pressed ? 0.4 : 0);
 		
-		drop-shadow-color: AppState.palette.color-neutral.transparentize(0.5);
-		drop-shadow-blur: 1px;
-		drop-shadow-offset-y: 2px;
+		drop-shadow-color: root.is-ghost ? transparent : AppState.palette.color-neutral.transparentize(0.5);
+		drop-shadow-blur: root.is-ghost ? 0px : 1px;
+		drop-shadow-offset-y: root.is-ghost ? 0px : 2px;
 
 		HorizontalLayout {
 			spacing: 8px;
 			padding: AppState.palette.radius-box;
-			padding-left: padding-x > 0px ? padding-x : default-padding-x ? AppState.palette.radius-box * 3 : AppState.palette.radius-box;
-			padding-right: padding-x > 0px ? padding-x : default-padding-x ? AppState.palette.radius-box * 3 : AppState.palette.radius-box;
+			padding-left: padding-x > -1px ? padding-x : default-padding-x ? AppState.palette.radius-box * 3 : AppState.palette.radius-box;
+			padding-right: padding-x > -1px ? padding-x : default-padding-x ? AppState.palette.radius-box * 3 : AppState.palette.radius-box;
 			alignment: center;
 			cross-axis-alignment: center;
 	
 			if (icon.width > 0): Image {
 				source: icon;
-				width: 14px;
+				height: root.font-size;
+				width: root.font-size;
 				colorize: color != transparent ? color
 					: type == "primary" ? AppState.palette.color-secondary-content
 					: type == "secondary" ? AppState.palette.color-secondary-content
@@ -52,6 +70,7 @@ export component Button {
 	
 			if (text != ""): Text {
 				text: text;
+				font-size: root.font-size;
 				color: color != transparent ? color
 					: type == "primary" ? AppState.palette.color-secondary-content
 					: type == "secondary" ? AppState.palette.color-secondary-content
@@ -64,13 +83,14 @@ export component Button {
 			}
 		}
 
-		animate background {
+		animate background, y {
 			duration: 300ms;
 			easing: ease-out-quint;
 		}
 	}
 
 	ta := TouchArea {
+		mouse-cursor: pointer;
 		clicked => {
 			clicked()
 		}

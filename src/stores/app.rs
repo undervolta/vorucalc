@@ -1,5 +1,9 @@
 use std::fmt;
-use crate::slint_generatedAppWindow::{ UserSettings, SemanticSize };
+use slint::ModelRc;
+
+use crate::{ 
+	AppState, Palette, SettingsOption, slint_generatedAppWindow::{ SemanticSize, UserSettings }
+};
 
 impl UserSettings {
 	pub fn new() -> UserSettings {
@@ -44,7 +48,8 @@ pub fn get_user_settings() -> UserSettings {
 	UserSettings::new()
 }
 
-pub fn save_user_settings(settings: UserSettings) {
+pub fn save_user_settings(settings: ModelRc<SettingsOption>, state: &AppState, palette: &Palette) {
 	
-	println!("settings:\n{settings}")
+	// state.set_user_settings();
+	// println!("settings:\n{settings}")
 }

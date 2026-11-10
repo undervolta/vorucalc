@@ -120,7 +120,7 @@ export component Switch inherits Rectangle {
 
 				touch-area := TouchArea {
 					enabled: root.enabled;
-			
+					mouse-cursor: pointer;
 					clicked => {
 						root.toggle-checked();
 					}

@@ -15,6 +15,7 @@ export component Tabs inherits Rectangle {
 	in-out property <bool> is-active;
 	in property <length> pref-width;
 
+	y: ta.pressed ? 2px : 0px;
 	min-width: pref-width;
     preferred-width: pref-width;
 
@@ -64,6 +65,7 @@ export component Tabs inherits Rectangle {
 	}
 	
 	ta := TouchArea {
+		mouse-cursor: pointer;
 		clicked => {
 			AppLogic.select-tab(parent_id, id);
 		}
@@ -74,6 +76,11 @@ export component Tabs inherits Rectangle {
 		target-x: parent.width / 2;
 		target-y: parent.y - parent.height - 10px;
 		show: ta.has-hover;
+	}
+
+	animate y {
+		duration: 300ms;
+		easing: ease-out-quint;
 	}
 }
 

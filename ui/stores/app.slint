@@ -34,6 +34,15 @@ export struct UserSettings {
 	font-size: { title: string, value: SemanticSize },
 }
 
+export struct SettingsOption {
+	label: string,
+	desc: string,
+	checked: bool,
+	text: string,
+	size: SemanticSize,
+	type: int,		// 1 = switch, 2 = input, 3 = dropdown (SemanticSize)
+}
+
 export global AppState {
 	in-out property <int> selected-theme: 1;	// index
 	out property <ThemePalette> palette: Theme.list[selected-theme];
@@ -52,5 +61,5 @@ export global AppLogic {
 	pure callback convert-to-md(string) -> styled-text;	// (content)
 	callback select-tab(string, int);					// (id, selected)
 	callback parse-calc();
-	callback save-settings();
+	callback save-settings([SettingsOption]);
 }
