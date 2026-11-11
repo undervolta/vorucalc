@@ -1,10 +1,10 @@
-import { AppState, AppLogic, SemanticSize, SettingsOption } from "@stores/app.slint";
+import { AppState, AppLogic, SemanticSize, SettingsOption, UserSettingType } from "@stores/app.slint";
 import { Modal } from "@components/modal.slint";
 import { Switch } from "@components/switch.slint";
 import { LineInput } from "@components/line-edit.slint";
 import { Dropdown } from "@components/dropdown.slint";
 import { ListView, Palette } from "std-widgets.slint";
-import { Font } from "@styles";
+import { Font, Theme } from "@styles";
 
 component Label inherits VerticalLayout {
 	in property <string> title;
@@ -50,24 +50,60 @@ component SizeDropdown inherits Dropdown {
 	font-size: Font.sm;
 }
 
+component UnsavedModal inherits Modal {
+	callback on-discard();
+	callback on-save();
+
+	title: "Unsaved Changes";
+	size: "custom";
+	modal-width-custom: 256px;
+	modal-height-custom: 192px;
+
+	actions: [
+		{ text: "Discard", type: "error" },
+		{ text: "Save" }
+	];
+	action-clicked(idx) => {
+		if (idx == 1) {
+			on-save();
+		} else {
+			on-discard();
+		}
+
+		self.delayed-close();
+	}
+
+	HorizontalLayout {
+		padding: 16px;
+		cross-axis-alignment: center;
+
+		Text {
+			text: "Some options have been changed, save current settings?";
+			font-size: Font.sm;
+			wrap: word-wrap;
+		}
+	}
+}
+
 export component SettingsModal inherits Modal {
 	in property <length> dialog-width;
 	in property <length> dialog-height;
 	in-out property <[SettingsOption]> settings: [
-		{ type: 1, label: AppState.user-settings.dark-mode.title, desc: "", checked: AppState.user-settings.dark-mode.value },
-		{ type: 1, label: AppState.user-settings.show-err-msg.title, checked: AppState.user-settings.show-err-msg.value },
-		{ type: 1, label: AppState.user-settings.save-on-close.title, checked: AppState.user-settings.save-on-close.value },
-		{ type: 3, label: AppState.user-settings.decimal-prec.title, desc: AppState.user-settings.decimal-prec.desc, text: AppState.user-settings.decimal-prec.value },
-		{ type: 2, label: AppState.user-settings.decimal-separator.title, desc: AppState.user-settings.decimal-separator.desc, text: AppState.user-settings.decimal-separator.value },
-		{ type: 2, label: AppState.user-settings.digit-separator.title, desc: AppState.user-settings.digit-separator.desc, text: AppState.user-settings.digit-separator.value },
-		{ type: 4, label: AppState.user-settings.font-size.title, size: AppState.user-settings.font-size.value },
+		{ type: DarkMode, input-type: 1, label: AppState.user-settings.dark-mode.title, desc: "", checked: AppState.user-settings.dark-mode.value },
+		{ type: ShowErrMessage, input-type: 1, label: AppState.user-settings.show-err-msg.title, checked: AppState.user-settings.show-err-msg.value },
+		{ type: SaveOnClose, input-type: 1, label: AppState.user-settings.save-on-close.title, checked: AppState.user-settings.save-on-close.value },
+		{ type: DecimalPrecision, input-type: 3, label: AppState.user-settings.decimal-prec.title, desc: AppState.user-settings.decimal-prec.desc, text: AppState.user-settings.decimal-prec.value },
+		{ type: DecimalSeparator, input-type: 2, label: AppState.user-settings.decimal-separator.title, desc: AppState.user-settings.decimal-separator.desc, text: AppState.user-settings.decimal-separator.value },
+		{ type: DigitSeparator, input-type: 2, label: AppState.user-settings.digit-separator.title, desc: AppState.user-settings.digit-separator.desc, text: AppState.user-settings.digit-separator.value },
+		{ type: FontSize, input-type: 4, label: AppState.user-settings.font-size.title, size: AppState.user-settings.font-size.value },
 	];
 
 	function set-settings-toggle(index: int) {
-		// 	AppState.selected-theme = AppState.selected-theme == 1 ? 0 : 1;
-		// 	AppState.user-settings.dark-mode.value = AppState.palette.is-dark;
-		// 	Palette.color-scheme = AppState.palette.is-dark ? dark : light;
 		settings[index].checked = !settings[index].checked;
+		
+		if (index == 0) {
+			toggle-theme(settings[0].checked ? 1 : 0);
+		}
 	}
 
 	function set-settings-input-str(index: int, text: string) {
@@ -78,18 +114,44 @@ export component SettingsModal inherits Modal {
 		settings[index].size = size;
 	}
 
+	function toggle-theme(index: int) {
+		AppState.selected-theme = index;
+		AppState.palette = Theme.list[index];
+		Palette.color-scheme = AppState.palette.is-dark ? dark : light;
+	}
+
+	function reset-theme(index: int) {
+		if ((AppState.user-settings.dark-mode.value ? 1 : 0) != index) {
+			toggle-theme(AppState.user-settings.dark-mode.value ? 1 : 0);
+		}
+	}
+
 	title: "Settings";
 	width: dialog-width;
 	height: dialog-height;
 	size: "custom";
 	modal-width-custom: 384px;
 	modal-height-custom: 384px;
+	prevent-close: settings[0].checked != AppState.user-settings.dark-mode.value || 
+		settings[1].checked != AppState.user-settings.show-err-msg.value ||
+		settings[2].checked != AppState.user-settings.save-on-close.value ||
+		settings[3].text != AppState.user-settings.decimal-prec.value ||
+		settings[4].text != AppState.user-settings.decimal-separator.value ||
+		settings[5].text != AppState.user-settings.digit-separator.value ||
+		settings[6].size != AppState.user-settings.font-size.value;
 
 	actions: [{ text: "Save", type: "secondary" }];
 	action-clicked(idx) => {
 		if (idx == 0) {
 			AppLogic.save-settings(self.settings);
+			self.delayed-close();
 		}
+	}
+	on-close => {
+		reset-theme(settings[0].checked ? 1 : 0);
+	}
+	on-prevented-close => {
+		warn-modal.show();
 	}
 
 	VerticalLayout {
@@ -107,25 +169,45 @@ export component SettingsModal inherits Modal {
 					desc: option.desc; 
 				}
 				
-				if (option.type == 1): Switch {
+				if (option.input-type == 1): Switch {
 					checked: option.checked;
 					toggled => { root.set-settings-toggle(idx); }
 				}
-				if (option.type == 2 || option.type == 3): Input {
+				if (option.input-type == 2 || option.input-type == 3): Input {
 					text: option.text;
-					type: option.type == 3 ? InputType.number : InputType.text;
+					type: option.input-type == 3 ? InputType.number : InputType.text;
 
 					edited => { 
 						root.set-settings-input-str(idx, self.text); 
 					}
 				} 
-				if (option.type == 4): SizeDropdown {
+				if (option.input-type == 4): SizeDropdown {
 					value: option.size;
 					selected => {
 						set-settings-dropdown-size(idx, self.value-list[self.current-index]);
 					}
 				}
 			}
+		}
+	}
+
+	warn-modal := UnsavedModal {
+		width: root.width;
+		height: root.height;
+
+		on-discard => {
+			root.settings[0].checked = AppState.user-settings.dark-mode.value;
+			root.settings[1].checked = AppState.user-settings.show-err-msg.value;
+			root.settings[2].checked = AppState.user-settings.save-on-close.value;
+			root.settings[3].text = AppState.user-settings.decimal-prec.value;
+			root.settings[4].text = AppState.user-settings.decimal-separator.value;
+			root.settings[5].text = AppState.user-settings.digit-separator.value;
+			root.settings[6].size = AppState.user-settings.font-size.value;
+			root.toggle-theme(AppState.user-settings.dark-mode.value ? 1 : 0);
+			root.delayed-close();
+		}
+		on-save => {
+			root.action-clicked(0);
 		}
 	}
 }

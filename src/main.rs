@@ -58,10 +58,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 	let state_handle = state.as_weak();
 	let palette_handle = app.global::<Palette>().as_weak();
+	let theme_handle = app.global::<Theme>().as_weak();
 	logic.on_save_settings(move |current_settings| {
 		if let Some(app_state) = state_handle.upgrade() {
 			if let Some(palette) = palette_handle.upgrade() {
-				stores::app::save_user_settings(current_settings, &app_state, &palette);
+				if let Some(theme) = theme_handle.upgrade() {
+					stores::app::save_user_settings(&current_settings, stores::app::SaveSettingsHelper {
+						state: &app_state, 
+						palette: &palette, 
+						theme: &theme
+					});
+				}
 			}
 		}
 	});

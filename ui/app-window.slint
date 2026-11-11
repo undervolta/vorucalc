@@ -13,6 +13,7 @@ import "./fonts/poppins.semibold.ttf";
 
 export { AppState, AppLogic } from "@stores/app.slint";
 export { Palette } from "std-widgets.slint";
+export { Theme } from "@styles";
 
 export component AppWindow inherits Window {
 	title: "VoruCalc";
@@ -75,8 +76,7 @@ export component AppWindow inherits Window {
 				ButtonTrigger {
 					bg-color: AppState.palette.color-base-200.darker(0.1);
 					color: AppState.palette.color-base-content;
-					height: 36px; width: 36px;
-					default-padding-x: false;
+					height: 36px; width: 36px; padding-x: 0px;
 					icon: @image-url("icons/cog.svg");
 					on-click => {
 						settings.show();
@@ -136,7 +136,7 @@ export component AppWindow inherits Window {
 		KeyBinding {
 			keys: @keys(Control + ",");
 			activated => {
-				settings.show();
+				// settings.show();
 			}
 		}
 

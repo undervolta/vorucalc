@@ -24,6 +24,16 @@ export enum SemanticSize {
 	xxl
 }
 
+export enum UserSettingType {
+	DarkMode,
+	ShowErrMessage,
+	SaveOnClose,
+	DecimalPrecision,
+	DecimalSeparator,
+	DigitSeparator,
+	FontSize
+}
+
 export struct UserSettings {
 	dark-mode: { title: string, value: bool },
 	show-err-msg: { title: string, value: bool },
@@ -35,17 +45,18 @@ export struct UserSettings {
 }
 
 export struct SettingsOption {
+	type: UserSettingType,
 	label: string,
 	desc: string,
 	checked: bool,
 	text: string,
 	size: SemanticSize,
-	type: int,		// 1 = switch, 2 = input, 3 = dropdown (SemanticSize)
+	input-type: int,		// 1 = switch, 2 = input, 3 = dropdown (SemanticSize)
 }
 
 export global AppState {
 	in-out property <int> selected-theme: 1;	// index
-	out property <ThemePalette> palette: Theme.list[selected-theme];
+	in-out property <ThemePalette> palette: Theme.list[selected-theme];
 	in property <string> screen;
 	in property <length> screen-width;
 	in-out property <string> calc-input;

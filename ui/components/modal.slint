@@ -31,133 +31,153 @@ export component Modal inherits PopupWindow {
 	in property <length> header-height: 48px;
 	in property <length> actions-height: 48px;
 	in property <[ButtonProps]> actions;
+	in property <bool> prevent-close: false;
 	in-out property <length> modal-y-offset: 0px;
 	in-out property <bool> is-opening: false;
 	in-out property <bool> is-closing: false;
 	in-out property <bool> has-closed: false;
 	callback action-clicked(int);
+	callback on-close();
+	callback on-prevented-close();
 
-	close-policy: close-on-click-outside;
+	close-policy: no-auto-close;
+	forward-focus: fs;
 
-	function delayed-close() {
-		root.is-closing = true;
-		bg.opacity = 0;
-		content.opacity = 0;
-		timer.interval = 300ms;
-		timer.running = true;
-	}
-
-	bg := Rectangle {
-		opacity: 0;
-		background: black.with-alpha(0.4);
-
-		animate opacity {
-			duration: 300ms;
-			easing: ease-out-quint;
+	public function delayed-close() {
+		if (!self.prevent-close) {
+			root.is-closing = true;
+			root.on-close();
+	
+			bg.opacity = 0;
+			content.opacity = 0;
+			timer.interval = 300ms;
+			timer.running = true;
+		} else {
+			root.on-prevented-close();
 		}
 	}
 
-	TouchArea {
-		pointer-event(event) => {
-			if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up && (
-				self.mouse-x < content.x || self.mouse-x > content.x + content.width ||
-				self.mouse-y < content.y || self.mouse-y > content.y + content.height
-			)) {
+	fs := FocusScope {
+		bg := Rectangle {
+			opacity: 0;
+			background: black.with-alpha(0.4);
+	
+			animate opacity {
+				duration: 300ms;
+				easing: ease-out-quint;
+			}
+		}
+	
+		TouchArea {
+			pointer-event(event) => {
+				if (event.button == PointerEventButton.left && event.kind == PointerEventKind.up && (
+					self.mouse-x < content.x || self.mouse-x > content.x + content.width ||
+					self.mouse-y < content.y || self.mouse-y > content.y + content.height
+				)) {
+					root.delayed-close();
+				}
+			}
+		}
+	
+		content := Rectangle {
+			x: root.modal-x;
+			width: root.modal-width;
+			height: min(root.modal-height, root.modal-height + (root.actions.length > 0 ? root.actions-height : 0px));
+			opacity: 0;
+			background: AppState.palette.color-base-300;
+			border-radius: AppState.palette.radius-box;
+			drop-shadow-offset-y: 4px;
+			drop-shadow-blur: 6px;
+			drop-shadow-color: black.with-alpha(0.7);
+	
+			if (root.title != ""): Rectangle {
+				y: 0px; height: root.header-height;
+				
+				HorizontalLayout {
+					padding-left: 16px; padding-right: 16px;
+					padding-top: 12px; padding-bottom: 8px;
+					alignment: space-between;
+					cross-axis-alignment: center;
+	
+					Text {
+						text: root.title;
+						font-size: Font.lg;
+						font-weight: Font.semibold;
+						color: AppState.palette.color-base-content;
+						overflow: elide;
+					}
+					Button {
+						icon: @image-url("../icons/close.svg");
+						color: AppState.palette.color-base-content;
+						height: 28px; width: 28px; padding-x: 0px;
+						font-size: Font.lg;
+						is-ghost: true;
+						clicked => { root.delayed-close(); }
+					}
+				}
+	
+				Rectangle {
+					x: 16px; y: root.header-height + 4px; width: parent.width - 32px;
+					background: AppState.palette.color-base-200;
+					height: 2px;
+					border-radius: 1px;
+				}
+			}
+	
+			Rectangle {
+				y: root.title == "" ? 0px : root.header-height + 4px;
+				height: (root.title == "" ? parent.height : parent.height - (root.header-height + 8px)) - (root.actions.length > 0 ? root.actions-height : 0px);
+	
+				@children
+			}
+	
+			if (actions.length > 0): Rectangle {
+				y: parent.height - root.actions-height; 
+				height: root.actions-height;
+				
+				HorizontalLayout {
+					spacing: 8px;
+					padding-left: 16px; padding-right: 16px;
+					alignment: end;
+					cross-axis-alignment: start;
+	
+					for action[idx] in actions: Button {
+						height: 32px;
+						font-size: Font.sm;
+						padding-x: 4px;
+						type: action.type;
+						text: action.text;
+						icon: action.icon;
+						color: action.color;
+						bg-color: action.bg-color;
+						clicked => { root.action-clicked(idx); }
+					}
+				}
+			}
+	
+			states [
+				init when (!root.is-opening && !root.is-closing) || root.is-closing: {
+					y: max(0px, root.modal-y + root.modal-y-offset + 12px);
+				}
+				anim-in when root.is-opening && !root.is-closing: {
+					y: max(0px, root.modal-y + root.modal-y-offset);
+				}
+			]
+	
+			animate opacity, y {
+				duration: 300ms;
+				easing: ease-out-quint;
+			}
+		}
+
+		KeyBinding {
+			keys: @keys(Escape);
+			activated => {
 				root.delayed-close();
 			}
 		}
 	}
 
-	content := Rectangle {
-		x: root.modal-x;
-		width: root.modal-width;
-		height: min(root.modal-height, root.modal-height + (root.actions.length > 0 ? root.actions-height : 0px));
-		opacity: 0;
-		background: AppState.palette.color-base-300;
-		border-radius: AppState.palette.radius-box;
-		drop-shadow-offset-y: 4px;
-		drop-shadow-blur: 6px;
-		drop-shadow-color: black.with-alpha(0.7);
-
-		if (root.title != ""): Rectangle {
-			y: 0px; height: root.header-height;
-			
-			HorizontalLayout {
-				padding-left: 16px; padding-right: 16px;
-				padding-top: 12px; padding-bottom: 8px;
-				alignment: space-between;
-				cross-axis-alignment: center;
-
-				Text {
-					text: root.title;
-					font-size: Font.lg;
-					font-weight: Font.semibold;
-					color: AppState.palette.color-neutral-content;
-					overflow: elide;
-				}
-				Button {
-					icon: @image-url("../icons/close.svg");
-					color: AppState.palette.color-neutral-content;
-					height: 28px; width: 28px; padding-x: 0px;
-					font-size: Font.lg;
-					is-ghost: true;
-					clicked => { root.delayed-close(); }
-				}
-			}
-
-			Rectangle {
-				x: 16px; y: root.header-height + 4px; width: parent.width - 32px;
-				background: AppState.palette.color-base-200;
-				height: 2px;
-				border-radius: 1px;
-			}
-		}
-
-		Rectangle {
-			y: root.title == "" ? 0px : root.header-height + 4px;
-			height: (root.title == "" ? parent.height : parent.height - (root.header-height + 8px)) - (root.actions.length > 0 ? root.actions-height : 0px);
-
-			@children
-		}
-
-		if (actions.length > 0): Rectangle {
-			y: parent.height - root.actions-height; 
-			height: root.actions-height;
-			
-			HorizontalLayout {
-				spacing: 8px;
-				padding-left: 16px; padding-right: 16px;
-				alignment: end;
-				cross-axis-alignment: start;
-
-				for action[idx] in actions: Button {
-					height: 32px;
-					font-size: Font.sm;
-					padding-x: 4px;
-					type: action.type;
-					text: action.text;
-					icon: action.icon;
-					color: action.color;
-					bg-color: action.bg-color;
-					clicked => { root.action-clicked(idx); }
-				}
-			}
-		}
-
-		states [
-			init when (!root.is-opening && !root.is-closing) || root.is-closing: {
-				y: max(0px, root.modal-y + root.modal-y-offset + 12px);
-			}
-			anim-in when root.is-opening && !root.is-closing: {
-				y: max(0px, root.modal-y + root.modal-y-offset);
-			}
-		]
-
-		animate opacity, y {
-			duration: 300ms;
-			easing: ease-out-quint;
-		}
-	}
 
 	timer := Timer {
 		interval: 10ms;

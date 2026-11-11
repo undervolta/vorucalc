@@ -1,9 +1,19 @@
 use std::fmt;
-use slint::ModelRc;
+use slint::{ 
+	Model, ModelRc,
+	language::ColorScheme
+};
 
 use crate::{ 
-	AppState, Palette, SettingsOption, slint_generatedAppWindow::{ SemanticSize, UserSettings }
+	AppState, Palette, SettingsOption, Theme, 
+	slint_generatedAppWindow::{ SemanticSize, UserSettings, UserSettingType }
 };
+
+pub struct SaveSettingsHelper<'a> {
+	pub state: &'a AppState<'a>,
+	pub palette: &'a Palette<'a>,
+	pub theme: &'a Theme<'a>,
+}
 
 impl UserSettings {
 	pub fn new() -> UserSettings {
@@ -48,8 +58,49 @@ pub fn get_user_settings() -> UserSettings {
 	UserSettings::new()
 }
 
-pub fn save_user_settings(settings: ModelRc<SettingsOption>, state: &AppState, palette: &Palette) {
-	
-	// state.set_user_settings();
+pub fn save_user_settings(settings: &ModelRc<SettingsOption>, helper: SaveSettingsHelper) {
+	let SaveSettingsHelper { 
+		state, 
+		palette, 
+		theme 
+	} = helper;
+
+	let saved_settings = settings.iter()
+		.fold(UserSettings::new(), |mut acc, stg| {
+			match stg.r#type {
+				UserSettingType::DarkMode => {
+					state.set_selected_theme(if stg.checked { 1 } else { 0 });
+					state.set_palette(theme.get_list().row_data(state.get_selected_theme() as usize)
+						.unwrap_or(theme.get_list().row_data(1).unwrap()));
+
+					let dark_theme = state.get_palette().is_dark;
+
+					palette.set_color_scheme(if dark_theme { ColorScheme::Dark } else { ColorScheme::Light });
+					acc.dark_mode.1 = dark_theme;
+				},
+				UserSettingType::DecimalPrecision => {
+					acc.decimal_prec.2 = stg.text;
+				},
+				UserSettingType::DecimalSeparator => {
+					acc.decimal_separator.2 = stg.text;
+				},
+				UserSettingType::DigitSeparator => {
+					acc.digit_separator.2 = stg.text;
+				},
+				UserSettingType::FontSize => {
+					acc.font_size.1 = stg.size;
+				},
+				UserSettingType::SaveOnClose => {
+					acc.save_on_close.1 = stg.checked;
+				},
+				UserSettingType::ShowErrMessage => {
+					acc.show_err_msg.1 = stg.checked;
+				},
+			};
+
+			acc
+		});
+
+	state.set_user_settings(saved_settings);
 	// println!("settings:\n{settings}")
 }
