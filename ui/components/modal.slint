@@ -30,6 +30,7 @@ export component Modal inherits PopupWindow {
 	property <length> modal-y: self.height / 2 - modal-height / 2;
 	in property <length> header-height: 48px;
 	in property <length> actions-height: 48px;
+	in property <length> actions-pref-width: 80px;
 	in property <[ButtonProps]> actions;
 	in property <bool> prevent-close: false;
 	in-out property <length> modal-y-offset: 0px;
@@ -142,6 +143,7 @@ export component Modal inherits PopupWindow {
 					cross-axis-alignment: start;
 	
 					for action[idx] in actions: Button {
+						preferred-width: root.actions-pref-width;
 						height: 32px;
 						font-size: Font.sm;
 						padding-x: 4px;

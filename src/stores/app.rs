@@ -21,9 +21,9 @@ impl UserSettings {
 			dark_mode: ( "Dark Mode".into(), true ),
 			show_err_msg: ( "Show Error Message".into(), true ),
 			save_on_close: ( "Save on Close".into(), false ),
-			decimal_prec: ( "The maximum number of digits that display after the decimal separator".into(), "Decimal Precision".into(), "3".into() ),
-			decimal_separator: ( "The symbol used to split the whole number part from the fractional part".into(), "Decimal Separator".into(), ".".into() ),
-			digit_separator: ( "The symbol used to group digits in large numbers to make them easier to read".into(), "Digit Separator".into(), ",".into() ),
+			decimal_prec: ( "The maximum number of digits displayed after the decimal separator".into(), "Decimal Precision".into(), "3".into() ),
+			decimal_separator: ( "The symbol used to split the whole number part from the fractional part (output only)".into(), "Decimal Separator".into(), ".".into() ),
+			digit_separator: ( "The symbol used to group digits in large numbers (output only)".into(), "Digit Separator".into(), ",".into() ),
 			font_size: ( "Font Size".into(), SemanticSize::Lg ),
 		}
 	}
@@ -102,5 +102,4 @@ pub fn save_user_settings(settings: &ModelRc<SettingsOption>, helper: SaveSettin
 		});
 
 	state.set_user_settings(saved_settings);
-	// println!("settings:\n{settings}")
 }

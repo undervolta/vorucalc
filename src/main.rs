@@ -13,6 +13,8 @@ mod components;
 mod lang;
 mod stores;
 
+use lang::calc;
+
 fn main() -> Result<(), Box<dyn Error>> {
 	let app = AppWindow::new()?;
 	let state = app.global::<AppState>();
@@ -76,7 +78,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let state_handle = state.as_weak();
 	logic.on_parse_calc(move || {
 		if let Some(app_state) = state_handle.upgrade() {
-			let res = match lang::calc::parse_calc(app_state.get_calc_input(), app_state.get_var()) {
+			let settings = app_state.get_user_settings();
+
+			let res = match calc::parse_calc(app_state.get_calc_input(), app_state.get_var(), calc::CalcParsingOptions {
+				decimal_prec: settings.decimal_prec.2.parse::<i32>().unwrap_or(3),
+				decimal_sep: settings.decimal_separator.2.as_str(),
+				digit_sep: settings.digit_separator.2.as_str()
+			}) {
 				Ok(res) => {
 					if !res.contains("?") {
 						app_state.set_error_msg(SharedString::new());

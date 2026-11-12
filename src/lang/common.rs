@@ -1,5 +1,6 @@
 use logos::Logos;
 use std::{ fmt, collections::HashMap };
+use num_format::{ Locale, ToFormattedString };
 
 #[derive(Logos, Debug, PartialEq, Clone)]
 #[logos(skip r"[ \t\r]+")]
@@ -32,10 +33,10 @@ pub enum Token {
 	#[token(")")]
 	RParen,
 
-	#[regex(r"[0-9]+\.[0-9]+", |lex| lex.slice().parse::<f64>().map_err(|_| LexError::NumberOverflow))]
+	#[regex(r"[0-9]+(_[0-9]+)*\.[0-9]+", |lex| lex.slice().replace("_", "").parse::<f64>().map_err(|_| LexError::NumberOverflow))]
 	Float(f64),
 
-	#[regex(r"[0-9]+", |lex| lex.slice().parse::<i64>().map_err(|_| LexError::NumberOverflow))]
+	#[regex(r"[0-9]+(_[0-9]+)*", |lex| lex.slice().replace("_", "").parse::<i64>().map_err(|_| LexError::NumberOverflow))]
 	Number(i64),
 
 	// Identifiers
@@ -73,12 +74,30 @@ pub enum Expr {
 
 pub type VarStmt = (String, Expr);
 
-fn round_to_places(val: f64, places: i32) -> f64 {
-	let factor = 10.0_f64.powi(places);
-	(val * factor).round() / factor
+
+pub fn format_float(value: f64, decimal_prec: usize) -> String {
+	let formatted = format!("{:.*}", decimal_prec, value.abs());
+
+    let (integer, fraction) = formatted
+        .split_once('.')
+        .unwrap_or((&formatted, ""));
+
+    let grouped = integer
+        .parse::<u64>()
+        .unwrap_or(0)
+        .to_formatted_string(&Locale::en);
+
+	let fraction = fraction.trim_end_matches('0');
+    let sign = if value.is_sign_negative() { "-" } else { "" };
+
+    if fraction.is_empty() {
+        format!("{sign}{grouped}")
+    } else {
+        format!("{sign}{grouped}.{fraction}")
+    }
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum Value {
 	Int(i64),
 	Float(f64),
@@ -89,7 +108,7 @@ impl Value {
 	pub fn as_f64(self) -> f64 {
 		match self {
 			Value::Int(n) => n as f64,
-			Value::Float(f) => round_to_places(f, 3),
+			Value::Float(f) => f,
 			Value::Invalid => 0.0
 		}
 	}
@@ -121,7 +140,7 @@ fn apply(l: Value, op: BinOp, r: Value) -> Option<Value> {
 				if b == 0 {
 					None
 				} else {
-					Some(round_to_places(a as f64 / b as f64, 3)).map(Value::Float)
+					Some((a as f64) / (b as f64)).map(Value::Float)
 				}
 			},
 		},

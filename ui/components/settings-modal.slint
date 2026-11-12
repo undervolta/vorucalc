@@ -144,6 +144,7 @@ export component SettingsModal inherits Modal {
 	action-clicked(idx) => {
 		if (idx == 0) {
 			AppLogic.save-settings(self.settings);
+			AppLogic.parse-calc();
 			self.delayed-close();
 		}
 	}
@@ -194,6 +195,7 @@ export component SettingsModal inherits Modal {
 	warn-modal := UnsavedModal {
 		width: root.width;
 		height: root.height;
+		actions-pref-width: 88px;
 
 		on-discard => {
 			root.settings[0].checked = AppState.user-settings.dark-mode.value;
