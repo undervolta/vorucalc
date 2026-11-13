@@ -1,4 +1,4 @@
-use std::fmt;
+use std::{ fmt, path::PathBuf };
 use slint::{ 
 	Model, ModelRc,
 	language::ColorScheme
@@ -6,13 +6,15 @@ use slint::{
 
 use crate::{ 
 	AppState, Palette, SettingsOption, Theme, 
-	slint_generatedAppWindow::{ SemanticSize, UserSettings, UserSettingType }
+	slint_generatedAppWindow::{ SemanticSize, UserSettings, UserSettingType },
+	stores::storage::UserSettings as SavedUserSettings
 };
 
-pub struct SaveSettingsHelper<'a> {
+pub struct SaveSettingsHelper<'a, 'b> {
 	pub state: &'a AppState<'a>,
 	pub palette: &'a Palette<'a>,
 	pub theme: &'a Theme<'a>,
+	pub path: &'b PathBuf
 }
 
 impl UserSettings {
@@ -62,7 +64,8 @@ pub fn save_user_settings(settings: &ModelRc<SettingsOption>, helper: SaveSettin
 	let SaveSettingsHelper { 
 		state, 
 		palette, 
-		theme 
+		theme ,
+		path
 	} = helper;
 
 	let saved_settings = settings.iter()
@@ -100,6 +103,12 @@ pub fn save_user_settings(settings: &ModelRc<SettingsOption>, helper: SaveSettin
 
 			acc
 		});
+
+	let local_save = SavedUserSettings::new(&saved_settings);
+
+	if let Err(err) = local_save.save_settings(path, state) {
+		eprintln!("Error saving settings: {err}");
+	}
 
 	state.set_user_settings(saved_settings);
 }

@@ -11,15 +11,18 @@ slint::include_modules!();
 
 mod components;
 mod lang;
-mod stores;
+pub mod stores;
+pub mod utils;
 
 use lang::calc;
+use stores::storage;
 
 fn main() -> Result<(), Box<dyn Error>> {
 	let app = AppWindow::new()?;
 	let state = app.global::<AppState>();
 	let logic = app.global::<AppLogic>();
 
+	let storage = storage::AppStorage::new(stores::APP_NAME)?;
 	let tabs = components::tabs::get_app_tabs();
 
 	app.set_tabs(tabs.clone());
@@ -61,6 +64,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let state_handle = state.as_weak();
 	let palette_handle = app.global::<Palette>().as_weak();
 	let theme_handle = app.global::<Theme>().as_weak();
+	let settings_path = storage.config.clone();
 	logic.on_save_settings(move |current_settings| {
 		if let Some(app_state) = state_handle.upgrade() {
 			if let Some(palette) = palette_handle.upgrade() {
@@ -68,7 +72,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 					stores::app::save_user_settings(&current_settings, stores::app::SaveSettingsHelper {
 						state: &app_state, 
 						palette: &palette, 
-						theme: &theme
+						theme: &theme,
+						path: &settings_path.join("settings.toml")
 					});
 				}
 			}
@@ -158,6 +163,20 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 			app_state.set_calc_res(res);
 		}
+	});
+	
+	let app_handle = app.as_weak();
+	let state_handle = state.as_weak();
+	app.window().on_close_requested(move || {
+		if let Some(window) = app_handle.upgrade() {
+			if let Some(state) = state_handle.upgrade() {
+				if let Err(err) = storage.save_settings(&window, &state) {
+					eprintln!("Error saving config: {err}");
+				}
+			}
+		}
+		
+		slint::CloseRequestResponse::HideWindow
 	});
 
 	app.run()?;

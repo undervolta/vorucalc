@@ -10,7 +10,10 @@ chumsky = "0.13.0"
 logos = "0.16.1"
 num-format = "0.4.4"
 regex = "1.13.1"
+serde = { version = "1.0.229", features = ["derive"] }
 slint = "1.18.1"
+sysdirs = "0.10.2"		# sysdirs = { version = "0.9", features = ["android-auto"] }
+toml = "1.2.1"
 
 [build-dependencies]
 slint-build = "1.18.1"
