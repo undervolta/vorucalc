@@ -1,10 +1,15 @@
 use std::{
-	fs, io, path::PathBuf,
-	error::Error
+	error::Error, fs, io, path::PathBuf
 };
 use serde::{ Serialize, Deserialize };
-use slint::{ ComponentHandle, PhysicalPosition, PhysicalSize };
-use crate::{ AppState, AppWindow, SemanticSize, UserSettings as FeUserSettings, utils };
+use slint::{ 
+	ComponentHandle, Model, PhysicalPosition, PhysicalSize, SharedString,
+	language::ColorScheme
+};
+use crate::{ 
+	AppLogic, AppState, AppWindow, SemanticSize, 
+	UserSettings as FeUserSettings, stores::app::SaveSettingsHelper, utils 
+};
 
 pub struct AppStorage {
 	pub data: PathBuf,
@@ -94,21 +99,70 @@ impl AppStorage {
 		})
 	}
 
+	pub fn read_settings(path: &PathBuf, state: &AppState<'_>) -> Result<AppSettings, Box<dyn Error>> {
+		match fs::read_to_string(path) {
+			Ok(content) if content.trim().is_empty() => Ok(AppSettings::init(state)),
+			Ok(content) => { 
+				let res: AppSettings = toml::from_str(&content)?;
+				Ok(res)
+			},
+			Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(AppSettings::init(state)),
+			Err(e) => Err(e.into()),
+		}
+	}
+
+	pub fn load_settings(app: &AppWindow, helper: SaveSettingsHelper) -> Result<(), Box<dyn Error>> {
+		let SaveSettingsHelper { 
+			state, 
+			palette, 
+			theme, 
+			path 
+		} = helper;
+		
+		let data = AppStorage::read_settings(path, state)?;
+		let mut user_settings = FeUserSettings::new();
+
+		user_settings.dark_mode.1 = data.settings.dark_mode;
+		user_settings.decimal_prec.2 = SharedString::from(data.settings.decimal_prec.to_string());
+		user_settings.decimal_separator.2 = SharedString::from(data.settings.decimal_separator);
+		user_settings.digit_separator.2 = SharedString::from(data.settings.digit_separator);
+		user_settings.font_size.1 = data.settings.font_size;
+		user_settings.save_on_close.1 = data.settings.save_on_close;
+		user_settings.show_err_msg.1 = data.settings.show_err_msg;
+
+		state.set_selected_theme(if data.settings.dark_mode { 1 } else { 0 });
+		state.set_palette(theme.get_list().row_data(state.get_selected_theme() as usize)
+			.unwrap_or(theme.get_list().row_data(1).unwrap()));
+
+		let dark_theme = state.get_palette().is_dark;
+		let app_window = app.window();
+
+		palette.set_color_scheme(if dark_theme { ColorScheme::Dark } else { ColorScheme::Light });
+		state.set_user_settings(user_settings);
+
+		if data.settings.save_on_close {
+			let app_logic = app.global::<AppLogic>();
+
+			state.set_note(data.saved_input.note.into());
+			state.set_var(data.saved_input.var.into());
+			state.set_calc_input(data.saved_input.calc.into());
+			app_logic.invoke_parse_calc();
+		}
+
+		app_window.set_maximized(data.maximize);
+		app_window.set_position(PhysicalPosition { x: data.position.0, y: data.position.1 });
+		app_window.set_size(PhysicalSize { width: data.resolution.0, height: data.resolution.1 });
+
+		Ok(())
+	}
+
 	pub fn save_settings(&self, app: &AppWindow, state: &AppState<'_>) -> Result<(), Box<dyn Error>> {
 		let app_window = app.window();
 		let PhysicalPosition { x, y } = app_window.position();
 		let PhysicalSize { height, width } = app_window.size();
 		let FeUserSettings { save_on_close, .. } = state.get_user_settings();
 		
-		let file_path = self.config.join("settings.toml");
-		let mut data: AppSettings = match fs::read_to_string(&file_path) {
-			Ok(content) if content.trim().is_empty() => AppSettings::init(state),
-			Ok(content) => toml::from_str(&content)?,
-			Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-				AppSettings::init(state)
-			}
-			Err(e) => return Err(e.into()),
-		};
+		let mut data = AppStorage::read_settings(&self.config.join("settings.toml"), state)?;
 
 		data.maximize = app_window.is_maximized();
 		data.position = (x, y);
@@ -147,14 +201,7 @@ impl UserSettings {
 	}
 
 	pub fn save_settings(&self, path: &PathBuf, state: &AppState<'_>) -> Result<(), Box<dyn Error>> {
-		let mut data: AppSettings = match fs::read_to_string(path) {
-			Ok(content) if content.trim().is_empty() => AppSettings::init(state),
-			Ok(content) => toml::from_str(&content)?,
-			Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
-				AppSettings::init(state)
-			}
-			Err(e) => return Err(e.into()),
-		};
+		let mut data = AppStorage::read_settings(path, state)?;
 
 		data.settings = UserSettings {
 			dark_mode: self.dark_mode,

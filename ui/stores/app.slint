@@ -69,7 +69,6 @@ export global AppState {
 
 export global AppLogic {
 	pure callback load-image(string) -> image;			// (path)
-	pure callback convert-to-md(string) -> styled-text;	// (content)
 	callback select-tab(string, int);					// (id, selected)
 	callback parse-calc();
 	callback save-settings([SettingsOption]);

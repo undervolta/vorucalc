@@ -1,6 +1,6 @@
 import { VerticalBox } from "std-widgets.slint";
 import { Font, Theme, Breakpoint } from "@styles";
-import { AppState, AppLogic, TabsState } from "@stores/app.slint";
+import { AppState, AppLogic, TabsState, SemanticSize } from "@stores/app.slint";
 import { TabsGroup, Tabs } from "@components/tabs.slint";
 import { ButtonTrigger } from "@components/modal.slint";
 import { FieldInput } from "@components/text-edit.slint";
@@ -35,13 +35,20 @@ export component AppWindow inherits Window {
 	scope := FocusScope {
 		// fields
 		VerticalBox {
+			property <length> font-size: AppState.user-settings.font-size.value == SemanticSize.xs ? Font.xs
+									: AppState.user-settings.font-size.value == SemanticSize.sm ? Font.sm
+									: AppState.user-settings.font-size.value == SemanticSize.md ? Font.base
+									: AppState.user-settings.font-size.value == SemanticSize.lg ? Font.lg
+									: AppState.user-settings.font-size.value == SemanticSize.xl ? Font.xl
+									: AppState.user-settings.font-size.value == SemanticSize.xxl ? Font.x2l : Font.base;
 			padding-bottom: 50px;
 
 			if (active-tabs == "calc"): calc := CalcDiff {
+				font-size: parent.font-size;
 				input-len: parent.width / 2;
 			}
 			if (active-tabs == "var"): var := FieldInput {
-				font-size: Font.lg;
+				font-size: parent.font-size;
 				text <=> AppState.var;
 				move-to-last-on-init: true;
 				edited => {
@@ -52,7 +59,7 @@ export component AppWindow inherits Window {
 				}
 			}
 			if (active-tabs == "note"): note := FieldInput {
-				font-size: Font.lg;
+				font-size: parent.font-size;
 				text <=> AppState.note;
 				move-to-last-on-init: true;
 				on-init => {
@@ -86,7 +93,7 @@ export component AppWindow inherits Window {
 		}
 
 		// toast
-		VerticalBox {
+		if (AppState.user-settings.show-err-msg.value): VerticalBox {
 			alignment: end;
 			z: 1;
 

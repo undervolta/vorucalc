@@ -5,7 +5,7 @@ use std::{
 	error::Error, path::PathBuf
 };
 use regex::Regex;
-use slint::{ Image, Model, SharedString, StyledText };
+use slint::{ Image, Model, SharedString };
 
 slint::include_modules!();
 
@@ -53,18 +53,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 		}
 	});
 
-	let app_handle = app.as_weak();
-	logic.on_convert_to_md(move |content| {
-		match app_handle.upgrade() {
-			Some(_) => StyledText::from_plain_text(&content.to_owned()),
-			None => StyledText::default()
-		}
-	});
-
 	let state_handle = state.as_weak();
 	let palette_handle = app.global::<Palette>().as_weak();
 	let theme_handle = app.global::<Theme>().as_weak();
-	let settings_path = storage.config.clone();
+	let settings_path = storage.config.clone().join("settings.toml");
 	logic.on_save_settings(move |current_settings| {
 		if let Some(app_state) = state_handle.upgrade() {
 			if let Some(palette) = palette_handle.upgrade() {
@@ -73,7 +65,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 						state: &app_state, 
 						palette: &palette, 
 						theme: &theme,
-						path: &settings_path.join("settings.toml")
+						path: &settings_path
 					});
 				}
 			}
@@ -164,7 +156,22 @@ fn main() -> Result<(), Box<dyn Error>> {
 			app_state.set_calc_res(res);
 		}
 	});
+
+	// load settings
+	let palette_handle = app.global::<Palette>().as_weak();
+	let theme_handle = app.global::<Theme>().as_weak();
+	if let Some(palette) = palette_handle.upgrade() {
+		if let Some(theme) = theme_handle.upgrade() {
+			storage::AppStorage::load_settings(&app, stores::app::SaveSettingsHelper {
+				state: &state, 
+				palette: &palette, 
+				theme: &theme,
+				path: &storage.config.join("settings.toml")
+			})?;
+		}
+	}
 	
+	// save settings
 	let app_handle = app.as_weak();
 	let state_handle = state.as_weak();
 	app.window().on_close_requested(move || {

@@ -4,12 +4,7 @@ import { Font } from "@styles";
 
 export component CalcDiff inherits FocusScope {
 	in-out property <length> input-len;
-	out property <length> font-size: AppState.user-settings.font-size.value == SemanticSize.xs ? Font.xs
-							: AppState.user-settings.font-size.value == SemanticSize.sm ? Font.sm
-							: AppState.user-settings.font-size.value == SemanticSize.md ? Font.base
-							: AppState.user-settings.font-size.value == SemanticSize.lg ? Font.lg
-							: AppState.user-settings.font-size.value == SemanticSize.xl ? Font.xl
-							: AppState.user-settings.font-size.value == SemanticSize.xxl ? Font.x2l : Font.base;
+	in property <length> font-size;
 	
 	forward-focus: input;
 
