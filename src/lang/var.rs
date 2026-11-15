@@ -5,48 +5,14 @@ use std::collections::HashMap;
 use slint::{ SharedString };
 
 use crate::lang::common::{ 
-	Token, BinOp, Expr, Value, VarStmt,
-	lex, eval
+	Token, Value, VarStmt,
+	parse_token, lex, eval
 };
 
 
 fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<VarStmt>, extra::Err<Rich<'a, Token>>> {
-	let expr = recursive(|expr| {
-		let atom = select! {
-			Token::Number(n) => Expr::Int(n),
-			Token::Float(f) => Expr::Float(f),
-			Token::Identifier(s) => Expr::Var(s),
-			Token::Error => Expr::Invalid,
-		}
-		.or(expr.delimited_by(just(Token::LParen), just(Token::RParen)));
-
-		let unary = just(Token::Minus)
-			.repeated()
-			.foldr(atom, |_, rhs| Expr::Neg(Box::new(rhs)));
-
-		let product = unary.clone().foldl(
-			choice((
-				just(Token::Star).to(BinOp::Mul),
-				just(Token::Slash).to(BinOp::Div),
-			))
-			.then(unary)
-			.repeated(),
-			|l, (op, r)| Expr::Bin(Box::new(l), op, Box::new(r)),
-		);
-
-		product.clone().foldl(
-			choice((
-				just(Token::Plus).to(BinOp::Add),
-				just(Token::Minus).to(BinOp::Sub),
-			))
-			.then(product)
-			.repeated(),
-			|l, (op, r)| Expr::Bin(Box::new(l), op, Box::new(r)),
-		)
-	});
-
+	let expr = parse_token();
 	let ident = select! { Token::Identifier(s) => s };
-
 	let stmt = ident.then_ignore(just(Token::Equal)).then(expr);
 
 	// statements split by `;` or newline (any amount of them)

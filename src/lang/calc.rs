@@ -6,7 +6,7 @@ use num_format::{ Locale, ToFormattedString };
 use slint::{ SharedString };
 
 use crate::lang::{
-	common::{ Token, BinOp, Expr, Value, lex, eval, format_float },
+	common::{ Token, Expr, Value, parse_token, lex, eval, format_float },
 	var::parse_var
 };
 
@@ -17,41 +17,9 @@ pub struct CalcParsingOptions<'a> {
 }
 
 fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<Expr>, extra::Err<Rich<'a, Token>>> {
-	let expr = recursive(|expr| {
-		let atom = select! {
-			Token::Number(n) => Expr::Int(n),
-			Token::Float(f) => Expr::Float(f),
-			Token::Identifier(s) => Expr::Var(s),
-			Token::Error => Expr::Invalid,
-		}
-		.or(expr.delimited_by(just(Token::LParen), just(Token::RParen)));
+	let expr = parse_token();
 
-		let unary = just(Token::Minus)
-			.repeated()
-			.foldr(atom, |_, rhs| Expr::Neg(Box::new(rhs)));
-
-		let product = unary.clone().foldl(
-			choice((
-				just(Token::Star).to(BinOp::Mul),
-				just(Token::Slash).to(BinOp::Div),
-			))
-			.then(unary)
-			.repeated(),
-			|l, (op, r)| Expr::Bin(Box::new(l), op, Box::new(r)),
-		);
-
-		product.clone().foldl(
-			choice((
-				just(Token::Plus).to(BinOp::Add),
-				just(Token::Minus).to(BinOp::Sub),
-			))
-			.then(product)
-			.repeated(),
-			|l, (op, r)| Expr::Bin(Box::new(l), op, Box::new(r)),
-		)
-	});
-
-	// statements split by `;` or newline (any amount of them)
+	// statements split newline (any amount of them)
 	let sep = just(Token::NewLine)
 		.repeated()
 		.at_least(1);
