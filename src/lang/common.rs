@@ -1,6 +1,6 @@
 use logos::Logos;
-use chumsky::prelude::*;
-use std::{ fmt, collections::HashMap };
+use chumsky::{ prelude::* };
+use std::{ collections::HashMap, f64::consts as MathConst, fmt };
 use num_format::{ Locale, ToFormattedString };
 
 #[derive(Logos, Debug, PartialEq, Clone)]
@@ -52,87 +52,54 @@ pub enum Token {
 	#[token(")")]
 	RParen,
 
-	#[regex(r"[0-9]+(_[0-9]+)*\.[0-9]+", |lex| lex.slice().replace("_", "").parse::<f64>().map_err(|_| LexError::NumberOverflow))]
-	Float(f64),
-
-	#[regex(r"[0-9]+(_[0-9]+)*", |lex| lex.slice().replace("_", "").parse::<i64>().map_err(|_| LexError::NumberOverflow))]
-	Number(i64),
-
 	#[token(",")]
 	Comma,
 
 	#[token(".")]
 	Dot,
 
+	#[regex(r"[0-9]+(_[0-9]+)*\.[0-9]+", |lex| lex.slice().replace("_", "").parse::<f64>().map_err(|_| LexError::NumberOverflow))]
+	Float(f64),
+
+	#[regex(r"[0-9]+(_[0-9]+)*", |lex| lex.slice().replace("_", "").parse::<i64>().map_err(|_| LexError::NumberOverflow))]
+	Number(i64),
+
 	// functions
-	#[token("abs")]
-	FnAbs,
-	#[token("acos")]
-	FnAcos,
-	#[token("acosh")]
-	FnAcosh,
-	#[token("asin")]
-	FnAsin,
-	#[token("asinh")]
-	FnAsinh,
-	#[token("atan")]
-	FnAtan,
-	#[token("atan2")]
-	FnAtan2,
-	#[token("atanh")]
-	FnAtanh,
-	#[token("cbrt")]
-	FnCbrt,
-	#[token("ceil")]
-	FnCeil,
-	#[token("cos")]
-	FnCos,
-	#[token("cosh")]
-	FnCosh,
-	#[token("exp")]
-	FnExp,
-	#[token("exp2")]
-	FnExp2,
-	#[token("floor")]
-	FnFloor,
-	#[token("fract")]
-	FnFract,
-	#[token("ln")]
-	FnLn,
-	#[token("log")]
-	FnLog,
-	#[token("log10")]
-	FnLog10,
-	#[token("log2")]
-	FnLog2,
-	#[token("max")]
-	FnMax,
-	#[token("mid")]
-	FnMid,
-	#[token("min")]
-	FnMin,
-	#[token("pow")]
-	FnPow,
-	#[token("round")]
-	FnRound,
-	#[token("sign")]
-	FnSign,
-	#[token("sin")]
-	FnSin,
-	#[token("sinh")]
-	FnSinh,
-	#[token("sqrt")]
-	FnSqrt,
-	#[token("tan")]
-	FnTan,
-	#[token("tanh")]
-	FnTanh,
-	#[token("trunc")]
-	FnTrunc,
-	#[token("deg")]
-	FnDeg,
-	#[token("rad")]
-	FnRad,
+	#[token("abs", |_| MathFunction::Abs)]
+	#[token("acos", |_| MathFunction::Acos)]
+	#[token("acosh", |_| MathFunction::Acosh)]
+	#[token("asin", |_| MathFunction::Asin)]
+	#[token("asinh", |_| MathFunction::Asinh)]
+	#[token("atan", |_| MathFunction::Atan)]
+	#[token("atan2", |_| MathFunction::Atan2)]
+	#[token("atanh", |_| MathFunction::Atanh)]
+	#[token("cbrt", |_| MathFunction::Cbrt)]
+	#[token("ceil", |_| MathFunction::Ceil)]
+	#[token("cos", |_| MathFunction::Cos)]
+	#[token("cosh", |_| MathFunction::Cosh)]
+	#[token("exp", |_| MathFunction::Exp)]
+	#[token("exp2", |_| MathFunction::Exp2)]
+	#[token("floor", |_| MathFunction::Floor)]
+	#[token("fract", |_| MathFunction::Fract)]
+	#[token("ln", |_| MathFunction::Ln)]
+	#[token("log", |_| MathFunction::Log)]
+	#[token("log10", |_| MathFunction::Log10)]
+	#[token("log2", |_| MathFunction::Log2)]
+	#[token("max", |_| MathFunction::Max)]
+	#[token("mid", |_| MathFunction::Mid)]
+	#[token("min", |_| MathFunction::Min)]
+	#[token("pow", |_| MathFunction::Pow)]
+	#[token("round", |_| MathFunction::Round)]
+	#[token("sign", |_| MathFunction::Sign)]
+	#[token("sin", |_| MathFunction::Sin)]
+	#[token("sinh", |_| MathFunction::Sinh)]
+	#[token("sqrt", |_| MathFunction::Sqrt)]
+	#[token("tan", |_| MathFunction::Tan)]
+	#[token("tanh", |_| MathFunction::Tanh)]
+	#[token("trunc", |_| MathFunction::Trunc)]
+	#[token("deg", |_| MathFunction::Deg)]
+	#[token("rad", |_| MathFunction::Rad)]
+	Func(MathFunction),
 
 	// identifiers
 	#[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_owned())]
@@ -226,7 +193,7 @@ impl fmt::Display for Value {
 	}
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum MathFunction {
 	Abs,
 	Acos,
@@ -262,6 +229,34 @@ pub enum MathFunction {
 	Trunc,
 	Deg,
 	Rad,
+}
+
+impl MathFunction {
+	pub fn arity(&self) -> usize {
+		use MathFunction::*;
+
+		match self {
+			Atan2 | Log | Max | Min | Pow => 2,
+			Mid => 3,
+			_ => 1,
+		}
+	}
+}
+
+pub fn get_math_const() -> HashMap<String, Value> {
+	HashMap::from([
+		("e".into(), Value::Float(MathConst::E)),
+		("ln2".into(), Value::Float(MathConst::LN_2)),
+		("ln10".into(), Value::Float(MathConst::LN_10)),
+		("log2_10".into(), Value::Float(MathConst::LOG2_10)),
+		("log2_e".into(), Value::Float(MathConst::LOG2_E)),
+		("log10_2".into(), Value::Float(MathConst::LOG10_2)),
+		("log10_e".into(), Value::Float(MathConst::LOG10_E)),
+		("pi".into(), Value::Float(MathConst::PI)),
+		("phi".into(), Value::Float(MathConst::GOLDEN_RATIO)),
+		("sqrt_2".into(), Value::Float(MathConst::SQRT_2)),
+		("tau".into(), Value::Float(MathConst::TAU)),
+	])
 }
 
 pub fn lex(src: &str) -> Vec<Token> {
@@ -314,86 +309,82 @@ fn apply(l: Value, op: BinOp, r: Value) -> Option<Value> {
 	}
 }
 
-
 pub fn parse_token<'a>() -> impl Parser<'a, &'a [Token], Expr, extra::Err<Rich<'a, Token>>,> + Clone {
 	recursive(|expr| {
-		let atom = select! {
-			Token::Number(n) => Expr::Int(n),
-			Token::Float(f) => Expr::Float(f),
-			Token::Identifier(s) => Expr::Var(s),
-			Token::Error => Expr::Invalid,
-		}
-		.or(expr.clone().delimited_by(just(Token::LParen), just(Token::RParen)));
-		
-		// single parametered functions
-		let math_fn = choice((
-				choice((
-					just(Token::FnAbs).to(MathFunction::Abs),
-					just(Token::FnCeil).to(MathFunction::Ceil),
-					just(Token::FnFloor).to(MathFunction::Floor),
-					just(Token::FnFract).to(MathFunction::Fract),
-					just(Token::FnMax).to(MathFunction::Max),
-					just(Token::FnMid).to(MathFunction::Mid),
-					just(Token::FnMin).to(MathFunction::Min),
-					just(Token::FnPow).to(MathFunction::Pow),
-					just(Token::FnRound).to(MathFunction::Round),
-					just(Token::FnSign).to(MathFunction::Sign),
-					just(Token::FnTrunc).to(MathFunction::Trunc),
-				)),
-				choice((
-					just(Token::FnAcos).to(MathFunction::Acos),
-					just(Token::FnAcosh).to(MathFunction::Acosh),
-					just(Token::FnAsin).to(MathFunction::Asin),
-					just(Token::FnAsinh).to(MathFunction::Asinh),
-					just(Token::FnAtan).to(MathFunction::Atan),
-					just(Token::FnAtan2).to(MathFunction::Atan2),
-					just(Token::FnAtanh).to(MathFunction::Atanh),
-					just(Token::FnCbrt).to(MathFunction::Cbrt),
-					just(Token::FnCos).to(MathFunction::Cos),
-					just(Token::FnCosh).to(MathFunction::Cosh),
-					just(Token::FnDeg).to(MathFunction::Deg),
-					just(Token::FnExp).to(MathFunction::Exp),
-					just(Token::FnExp2).to(MathFunction::Exp2),				
-					just(Token::FnLn).to(MathFunction::Ln),
-					just(Token::FnLog).to(MathFunction::Log),
-					just(Token::FnLog10).to(MathFunction::Log10),
-					just(Token::FnLog2).to(MathFunction::Log2),
-					just(Token::FnRad).to(MathFunction::Rad),
-					just(Token::FnSin).to(MathFunction::Sin),
-					just(Token::FnSinh).to(MathFunction::Sinh),
-					just(Token::FnSqrt).to(MathFunction::Sqrt),
-					just(Token::FnTan).to(MathFunction::Tan),
-					just(Token::FnTanh).to(MathFunction::Tanh)
-				))
-			))
-			.then(expr
-				.separated_by(just(Token::Comma))
-				.allow_trailing()
-				.collect::<Vec<_>>()
-				.delimited_by(just(Token::LParen), just(Token::RParen)))
-			.map(|(math_fn, expr)| Expr::Function(math_fn, expr));
+		let func = select! { Token::Func(f) => f }.labelled("function");
 
-		let atom = atom.or(math_fn);
+		let args = expr
+			.clone()
+			.separated_by(just(Token::Comma))
+			.allow_trailing()
+			.collect::<Vec<_>>()
+			.delimited_by(just(Token::LParen), just(Token::RParen));
 
-		let unary = just(Token::Minus)
-			.repeated()
-			.foldr(atom, |_, rhs| Expr::Neg(Box::new(rhs)));
+		let atom = choice((
+			select! {
+				Token::Number(n) => Expr::Int(n),
+				Token::Float(f) => Expr::Float(f),
+				Token::Identifier(s) => Expr::Var(s),
+				Token::Error => Expr::Invalid,
+			},
+			func.clone()
+				.then(args.clone())
+				.try_map(|(f, a), span| {
+					if a.len() == f.arity() {
+						Ok(Expr::Function(f, a))
+					} else {
+						Err(Rich::custom(span, format!("{f:?} takes {} args", f.arity())))
+					}
+				}),
+			expr.delimited_by(just(Token::LParen), just(Token::RParen)),
+		));
 
-		let sqrt = just(Token::Hashtag)
-			.repeated()
-			.foldr(unary, |_, rhs| Expr::Sqrt(Box::new(rhs)));
+		// `.abs` (no parens) or `.pow(2)`, receiver counts as arg 0
+		let method = just(Token::Dot)
+			.ignore_then(func)
+			.then(args.or_not().map(Option::unwrap_or_default))
+			.try_map(|(f, a), span| {
+				if a.len() + 1 == f.arity() {
+					Ok((f, a))
+				} else {
+					Err(Rich::custom(span, format!("{f:?} method takes {} args", f.arity() - 1)))
+				}
+			});
 
-		let product = sqrt.clone().foldl(
-			choice((
-				just(Token::Caret).to(BinOp::Exp),
-				just(Token::DoubleStar).to(BinOp::Exp),
-			))
-			.then(sqrt)
-			.repeated(),
-			|l, (op, r)| Expr::Bin(Box::new(l), op, Box::new(r)),
+		let postfix = atom.foldl(
+			method.repeated(),
+			|lhs, (f, mut a)| {
+				a.insert(0, lhs);
+				Expr::Function(f, a)
+			},
 		);
 
-		let product = product.clone().foldl(
+		// unary + pow live in one recursive block so `2^-2` works
+		let unary = recursive(|unary| {
+			let pow = postfix
+				.clone()
+				.then(
+					choice((just(Token::Caret), just(Token::DoubleStar)))
+						.ignore_then(unary.clone())
+						.or_not(),
+				)
+				.map(|(l, r)| match r {
+					Some(r) => Expr::Bin(Box::new(l), BinOp::Exp, Box::new(r)),
+					None => l,
+				});
+
+			choice((
+				just(Token::Minus)
+					.ignore_then(unary.clone())
+					.map(|r| Expr::Neg(Box::new(r))),
+				just(Token::Hashtag)
+					.ignore_then(unary)
+					.map(|r| Expr::Sqrt(Box::new(r))),
+				pow,
+			))
+		});
+
+		let product = unary.clone().foldl(
 			choice((
 				just(Token::Star).to(BinOp::Mul),
 				just(Token::Slash).to(BinOp::Div),
@@ -401,7 +392,7 @@ pub fn parse_token<'a>() -> impl Parser<'a, &'a [Token], Expr, extra::Err<Rich<'
 				just(Token::Backslash).to(BinOp::IntDiv),
 				just(Token::DoubleSlash).to(BinOp::IntDiv),
 			))
-			.then(product)
+			.then(unary)
 			.repeated(),
 			|l, (op, r)| Expr::Bin(Box::new(l), op, Box::new(r)),
 		);
@@ -582,8 +573,8 @@ pub fn eval(e: &Expr, env: &HashMap<String, Value>) -> Option<Value> {
 				2 => {
 					if let [first, second] = &args[..2] {
 						let (sec_int, sec_float) = match eval(second, env)? {
-							Value::Int(n) => (n, 0.0),
-							Value::Float(f) => (0, f),
+							Value::Int(n) => (n as i32, n as f64),
+							Value::Float(f) => (f as i32, f),
 							Value::Invalid => (0, 0.0)
 						};
 
@@ -599,22 +590,22 @@ pub fn eval(e: &Expr, env: &HashMap<String, Value>) -> Option<Value> {
 								_ => None
 							},
 							MathFunction::Max => match eval(first, env)? {
-								Value::Int(n) => Some(Value::Int(n.max(sec_int))),
+								Value::Int(n) => Some(Value::Float((n as f64).max(sec_float))),
 								Value::Float(f) => Some(Value::Float(f.max(sec_float))),
 								_ => None
 							},
 							MathFunction::Mid => match eval(first, env)? {
-								Value::Int(n) => Some(Value::Int(n.midpoint(sec_int))),
+								Value::Int(n) => Some(Value::Float((n as f64).midpoint(sec_float))),
 								Value::Float(f) => Some(Value::Float(f.midpoint(sec_float))),
 								_ => None
 							},
 							MathFunction::Min => match eval(first, env)? {
-								Value::Int(n) => Some(Value::Int(n.min(sec_int))),
+								Value::Int(n) => Some(Value::Float((n as f64).min(sec_float))),
 								Value::Float(f) => Some(Value::Float(f.min(sec_float))),
 								_ => None
 							},
 							MathFunction::Pow => match eval(first, env)? {
-								Value::Int(n) => Some(Value::Int(n.pow(sec_int as u32))),
+								Value::Int(n) => Some(Value::Float((n as f64).powi(sec_int))),
 								Value::Float(f) => Some(Value::Float(f.powf(sec_float))),
 								_ => None
 							},

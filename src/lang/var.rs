@@ -6,7 +6,7 @@ use slint::{ SharedString };
 
 use crate::lang::common::{ 
 	Token, Value, VarStmt,
-	parse_token, lex, eval
+	parse_token, lex, get_math_const, eval
 };
 
 
@@ -34,7 +34,7 @@ pub fn parse_var(src: &SharedString) -> Result<HashMap<String, Value>, String> {
 		Err(errs) => return Err(errs.into_iter().map(|err| format!("var:{err:?}\n")).collect()),
 	};
 
-	let mut env = HashMap::new();
+	let mut env = get_math_const();
 	for (name, expr) in &stmts {
 		match eval(expr, &env) {
 			Some(val) => {
