@@ -27,6 +27,8 @@ export enum SemanticSize {
 export enum UserSettingType {
 	DarkMode,
 	ShowErrMessage,
+	ShowNotes,
+	SeparateVariable,
 	SaveOnClose,
 	DecimalPrecision,
 	DecimalSeparator,
@@ -37,6 +39,8 @@ export enum UserSettingType {
 export struct UserSettings {
 	dark-mode: { title: string, value: bool },
 	show-err-msg: { title: string, value: bool },
+	show-notes: { title: string, desc: string, value: bool },
+	separate-var: { title: string, desc: string, value: bool },
 	save-on-close: { title: string, value: bool },
 	decimal-prec: { title: string, desc: string, value: string },
 	decimal-separator: { title: string, desc: string, value: string },
@@ -57,8 +61,9 @@ export struct SettingsOption {
 export global AppState {
 	in-out property <int> selected-theme: 1;	// index
 	in-out property <ThemePalette> palette: Theme.list[selected-theme];
-	in property <string> screen;
 	in property <length> screen-width;
+	in property <length> calc-width: 200px;
+	in property <length> calc-height: 100px;
 	in-out property <string> calc-input;
 	in-out property <string> calc-res;
 	in-out property <string> var;
@@ -69,6 +74,7 @@ export global AppState {
 
 export global AppLogic {
 	pure callback load-image(string) -> image;			// (path)
+	callback refresh-tab(string);
 	callback select-tab(string, int);					// (id, selected)
 	callback parse-calc();
 	callback save-settings([SettingsOption]);

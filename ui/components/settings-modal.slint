@@ -91,6 +91,8 @@ export component SettingsModal inherits Modal {
 	in-out property <[SettingsOption]> settings: [
 		{ type: DarkMode, input-type: 1, label: AppState.user-settings.dark-mode.title, desc: "", checked: AppState.user-settings.dark-mode.value },
 		{ type: ShowErrMessage, input-type: 1, label: AppState.user-settings.show-err-msg.title, checked: AppState.user-settings.show-err-msg.value },
+		{ type: ShowNotes, input-type: 1, label: AppState.user-settings.show-notes.title, desc: AppState.user-settings.show-notes.desc, checked: AppState.user-settings.show-notes.value },
+		{ type: SeparateVariable, input-type: 1, label: AppState.user-settings.separate-var.title, desc: AppState.user-settings.separate-var.desc, checked: AppState.user-settings.separate-var.value },
 		{ type: SaveOnClose, input-type: 1, label: AppState.user-settings.save-on-close.title, checked: AppState.user-settings.save-on-close.value },
 		{ type: DecimalPrecision, input-type: 3, label: AppState.user-settings.decimal-prec.title, desc: AppState.user-settings.decimal-prec.desc, text: AppState.user-settings.decimal-prec.value },
 		{ type: DecimalSeparator, input-type: 2, label: AppState.user-settings.decimal-separator.title, desc: AppState.user-settings.decimal-separator.desc, text: AppState.user-settings.decimal-separator.value },
@@ -134,11 +136,13 @@ export component SettingsModal inherits Modal {
 	modal-height-custom: 384px;
 	prevent-close: settings[0].checked != AppState.user-settings.dark-mode.value || 
 		settings[1].checked != AppState.user-settings.show-err-msg.value ||
-		settings[2].checked != AppState.user-settings.save-on-close.value ||
-		settings[3].text != AppState.user-settings.decimal-prec.value ||
-		settings[4].text != AppState.user-settings.decimal-separator.value ||
-		settings[5].text != AppState.user-settings.digit-separator.value ||
-		settings[6].size != AppState.user-settings.font-size.value;
+		settings[2].checked != AppState.user-settings.show-notes.value ||
+		settings[3].checked != AppState.user-settings.separate-var.value ||
+		settings[4].checked != AppState.user-settings.save-on-close.value ||
+		settings[5].text != AppState.user-settings.decimal-prec.value ||
+		settings[6].text != AppState.user-settings.decimal-separator.value ||
+		settings[7].text != AppState.user-settings.digit-separator.value ||
+		settings[8].size != AppState.user-settings.font-size.value;
 
 	actions: [{ text: "Save", type: "secondary" }];
 	action-clicked(idx) => {
@@ -200,11 +204,13 @@ export component SettingsModal inherits Modal {
 		on-discard => {
 			root.settings[0].checked = AppState.user-settings.dark-mode.value;
 			root.settings[1].checked = AppState.user-settings.show-err-msg.value;
-			root.settings[2].checked = AppState.user-settings.save-on-close.value;
-			root.settings[3].text = AppState.user-settings.decimal-prec.value;
-			root.settings[4].text = AppState.user-settings.decimal-separator.value;
-			root.settings[5].text = AppState.user-settings.digit-separator.value;
-			root.settings[6].size = AppState.user-settings.font-size.value;
+			root.settings[2].checked = AppState.user-settings.show-notes.value;
+			root.settings[3].checked = AppState.user-settings.separate-var.value;
+			root.settings[4].checked = AppState.user-settings.save-on-close.value;
+			root.settings[5].text = AppState.user-settings.decimal-prec.value;
+			root.settings[6].text = AppState.user-settings.decimal-separator.value;
+			root.settings[7].text = AppState.user-settings.digit-separator.value;
+			root.settings[8].size = AppState.user-settings.font-size.value;
 			root.toggle-theme(AppState.user-settings.dark-mode.value ? 1 : 0);
 			root.delayed-close();
 		}

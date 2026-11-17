@@ -16,8 +16,10 @@ pub struct CalcParsingOptions<'a> {
 	pub digit_sep: &'a str
 }
 
-fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<Expr>, extra::Err<Rich<'a, Token>>> {
-	let expr = parse_token();
+fn parser<'a>(
+	expr: impl Parser<'a, &'a [Token], Expr, extra::Err<Rich<'a, Token>>,> + Clone
+) -> impl Parser<'a, &'a [Token], Vec<Expr>, extra::Err<Rich<'a, Token>>> {
+	// let expr = parse_token();
 
 	// statements split newline (any amount of them)
 	let sep = just(Token::NewLine)
@@ -31,9 +33,16 @@ fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<Expr>, extra::Err<Rich<'a, T
 		.then_ignore(end())
 }
 
-pub fn parse_calc(calc_input: SharedString, var_input: SharedString, options: CalcParsingOptions) -> Result<SharedString, SharedString> {
-	let tokens = lex(&calc_input);
-	let stmts = match parser().parse(tokens.as_slice()).into_result() {
+pub fn parse_calc(
+	calc_input: SharedString, 
+	var_input: SharedString, 
+	options: CalcParsingOptions
+) -> Result<SharedString, SharedString> {
+	let calc_tokens = lex(&calc_input);
+	let var_tokens = lex(&var_input);
+	let expr = parse_token();
+
+	let stmts = match parser(&expr).parse(calc_tokens.as_slice()).into_result() {
 		Ok(s) => s,
 		Err(errs) => {
 			let err_len = errs.iter().len();
@@ -51,7 +60,7 @@ pub fn parse_calc(calc_input: SharedString, var_input: SharedString, options: Ca
 	} = options;
 
 	let mut env = HashMap::<i64, Value>::new();
-	let vars = parse_var(&var_input)?;
+	let vars = parse_var(&var_tokens, &expr)?;
 
 	for (idx, expr) in stmts.iter().enumerate() {
 		match eval(expr, &vars) {

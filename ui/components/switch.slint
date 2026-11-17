@@ -66,8 +66,6 @@ export component Switch inherits Rectangle {
 				height: root.switch-height;
 
 				rail := Rectangle {
-					width: parent.width;
-					height: parent.height;
 					border-radius: self.height / 2;
 
 					background: !root.enabled
@@ -112,7 +110,6 @@ export component Switch inherits Rectangle {
 					width: parent.width + 6px;
 					height: parent.height + 6px;
 
-					background: transparent;
 					border-width: 2px;
 					border-color: root.focus-color;
 					border-radius: parent.height / 2 + 3px;

@@ -23,10 +23,44 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let logic = app.global::<AppLogic>();
 
 	let storage = storage::AppStorage::new(stores::APP_NAME)?;
-	let tabs = components::tabs::get_app_tabs();
 
+	// load settings
+	let palette_handle = app.global::<Palette>().as_weak();
+	let theme_handle = app.global::<Theme>().as_weak();
+	if let Some(palette) = palette_handle.upgrade() {
+		if let Some(theme) = theme_handle.upgrade() {
+			if let Err(e) = storage::AppStorage::load_settings(&app, stores::app::SaveSettingsHelper {
+				state: &state, 
+				palette: &palette, 
+				theme: &theme,
+				path: &storage.config.join("settings.toml"),
+				logic: None
+			}) {
+				eprintln!("Warning: {e}");
+			};
+		}
+	}
+
+	let tabs = components::tabs::get_app_tabs(&state);
+	// state.set_user_settings(stores::app::get_user_settings());
 	app.set_tabs(tabs.clone());
-	state.set_user_settings(stores::app::get_user_settings());
+
+	let app_handle = app.as_weak();
+	let state_handle = state.as_weak();
+	logic.on_refresh_tab(move |id| {
+		if let Some(ui) = app_handle.upgrade() {
+			if let Some(state) = state_handle.upgrade() {
+				let tab_list = components::tabs::get_app_tabs(&state);
+				ui.set_tabs(tab_list.clone());
+
+				if let Some((idx, mut tab_group)) = tab_list.iter().enumerate().find(|(_, tg)| tg.id == id) {
+					tab_group.selected = 1;
+					ui.set_active_tabs(tab_group.tabs.row_data(0).unwrap().name);
+					tab_list.set_row_data(idx, tab_group);
+				}
+			}
+		}
+	});
 	
 	let app_handle = app.as_weak();
 	logic.on_load_image(move |path| {
@@ -45,28 +79,34 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let app_handle = app.as_weak();
 	logic.on_select_tab(move |id, selected| {
 		if let Some(ui) = app_handle.upgrade() {
-			if let Some((idx, mut tab_group)) = tabs.iter().enumerate().find(|(_, tg)| tg.id == id) {
+			let tab_list = ui.get_tabs();
+
+			if let Some((idx, mut tab_group)) = tab_list.iter().enumerate().find(|(_, tg)| tg.id == id) {
 				tab_group.selected = selected + 1;
 				ui.set_active_tabs(tab_group.tabs.row_data(selected as usize).unwrap().name);
-				tabs.set_row_data(idx, tab_group);
+				tab_list.set_row_data(idx, tab_group);
 			}
 		}
 	});
 
 	let state_handle = state.as_weak();
+	let logic_handle = logic.as_weak();
 	let palette_handle = app.global::<Palette>().as_weak();
 	let theme_handle = app.global::<Theme>().as_weak();
 	let settings_path = storage.config.clone().join("settings.toml");
 	logic.on_save_settings(move |current_settings| {
 		if let Some(app_state) = state_handle.upgrade() {
-			if let Some(palette) = palette_handle.upgrade() {
-				if let Some(theme) = theme_handle.upgrade() {
-					stores::app::save_user_settings(&current_settings, stores::app::SaveSettingsHelper {
-						state: &app_state, 
-						palette: &palette, 
-						theme: &theme,
-						path: &settings_path
-					});
+			if let Some(app_logic) = logic_handle.upgrade() {
+				if let Some(palette) = palette_handle.upgrade() {
+					if let Some(theme) = theme_handle.upgrade() {
+						stores::app::save_user_settings(&current_settings, stores::app::SaveSettingsHelper {
+							state: &app_state, 
+							logic: Some(&app_logic),
+							palette: &palette, 
+							theme: &theme,
+							path: &settings_path
+						});
+					}
 				}
 			}
 		}
@@ -157,19 +197,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 		}
 	});
 
-	// load settings
-	let palette_handle = app.global::<Palette>().as_weak();
-	let theme_handle = app.global::<Theme>().as_weak();
-	if let Some(palette) = palette_handle.upgrade() {
-		if let Some(theme) = theme_handle.upgrade() {
-			storage::AppStorage::load_settings(&app, stores::app::SaveSettingsHelper {
-				state: &state, 
-				palette: &palette, 
-				theme: &theme,
-				path: &storage.config.join("settings.toml")
-			})?;
-		}
-	}
+	
 	
 	// save settings
 	let app_handle = app.as_weak();

@@ -3,65 +3,86 @@ import { AppState, AppLogic, SemanticSize } from "@stores/app.slint";
 import { Font } from "@styles";
 
 export component CalcDiff inherits FocusScope {
-	in-out property <length> input-len;
 	in property <length> font-size;
 	
 	forward-focus: input;
 
-	Rectangle {
-		opacity: root.enabled ? 1 : 0;
+	VerticalLayout {
+		padding: 0px;
 
-		input := FieldInput {
-			x: 0;
-			width: max(root.input-len, 100px);
-			font-size: root.font-size;
-			text <=> AppState.calc-input;
-			enabled: root.enabled;
-			move-to-last-on-init: true;
-
-			edited => { AppLogic.parse-calc(); }
-			on-init => { self.focus(); }
-			on-scroll => {
-				output.scroll-y = self.scroll-y;
+		main := Rectangle {
+			opacity: root.enabled ? 1 : 0;
+	
+			input := FieldInput {
+				x: 0;
+				width: clamp(AppState.calc-width, 100px, max(100px, parent.width - 108px));
+				font-size: root.font-size;
+				text <=> AppState.calc-input;
+				enabled: root.enabled;
+				move-to-last-on-init: true;
+	
+				edited => { AppLogic.parse-calc(); }
+				on-init => { self.focus(); }
+				on-scroll => {
+					output.scroll-y = self.scroll-y;
+				}
+			}
+	
+			bar := Rectangle {
+				x: input.width;
+				width: 8px;
+				opacity: root.enabled ? 1 : 0;
+	
+				ta := TouchArea {
+					mouse-cursor: ew-resize;
+					enabled: root.enabled;
+	
+					moved => {
+						if (self.pressed) {
+							AppState.calc-width = max(100px, min(
+								root.width - bar.width - 100px,
+								AppState.calc-width + self.mouse-x - self.pressed-x
+							));
+						}
+					}
+				}
+	
+				if (root.enabled): Image {
+					source: @image-url("../icons/vertical-dots.svg");
+					colorize: AppState.palette.color-neutral-content;
+				}
+			}
+	
+			output := FieldInput {
+				x: bar.x + bar.width;
+				width: max(parent.width - self.x, 0px);
+				read-only: true;
+				font-size: root.font-size;
+				font-weight: 600;
+				text <=> AppState.calc-res;
+				enabled: root.enabled;
 			}
 		}
 
-		bar := Rectangle {
-			x: root.input-len;
-			width: 8px;
+		if (!AppState.user-settings.separate-var.value): vert-bar := Rectangle {
+			height: 8px;
 			opacity: root.enabled ? 1 : 0;
-
-			ta := TouchArea {
-				mouse-cursor: ew-resize;
-				enabled: root.enabled;
-
-				moved => {
-					if (self.pressed) {
-						root.input-len = max(
-							100px,
-							min(
-								root.width - bar.width - 100px,
-								root.input-len + self.mouse-x - self.pressed-x
-							)
-						);
-					}
-				}
-			}
+			// background: red;
 
 			if (root.enabled): Image {
 				source: @image-url("../icons/vertical-dots.svg");
 				colorize: AppState.palette.color-neutral-content;
+				transform-rotation: 90deg;
 			}
 		}
 
-		output := FieldInput {
-			x: min(bar.x + bar.width, parent.width - 100px);
-			width: max(parent.width - root.input-len - bar.width, 100px);
-			read-only: true;
+		if (!AppState.user-settings.separate-var.value): var-list := FieldInput {
+			// y: bar.x + bar.width;
+			// height: max(parent.width - self.x, 0px);
+			text <=> AppState.var;
 			font-size: root.font-size;
-			font-weight: 600;
-			text <=> AppState.calc-res;
 			enabled: root.enabled;
+			edited => { AppLogic.parse-calc(); }
 		}
 	}
 }

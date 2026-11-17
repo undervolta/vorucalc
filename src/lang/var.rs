@@ -2,16 +2,16 @@ use chumsky::{
 	prelude::*
 };
 use std::collections::HashMap;
-use slint::{ SharedString };
 
 use crate::lang::common::{ 
-	Token, Value, VarStmt,
-	parse_token, lex, get_math_const, eval
+	Token, Value, VarStmt, Expr,
+	get_math_const, eval
 };
 
 
-fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<VarStmt>, extra::Err<Rich<'a, Token>>> {
-	let expr = parse_token();
+fn parser<'a>(
+	expr: impl Parser<'a, &'a [Token], Expr, extra::Err<Rich<'a, Token>>,> + Clone
+) -> impl Parser<'a, &'a [Token], Vec<VarStmt>, extra::Err<Rich<'a, Token>>> {
 	let ident = select! { Token::Identifier(s) => s };
 	let stmt = ident.then_ignore(just(Token::Equal)).then(expr);
 
@@ -27,9 +27,12 @@ fn parser<'a>() -> impl Parser<'a, &'a [Token], Vec<VarStmt>, extra::Err<Rich<'a
 		.then_ignore(end())
 }
 
-pub fn parse_var(src: &SharedString) -> Result<HashMap<String, Value>, String> {
-	let tokens = lex(src);
-	let stmts = match parser().parse(tokens.as_slice()).into_result() {
+pub fn parse_var<'a>(
+	tokens: &'a [Token], 
+	expr: impl Parser<'a, &'a [Token], Expr, extra::Err<Rich<'a, Token>>,> + Clone
+) -> Result<HashMap<String, Value>, String> {
+	// let tokens = lex(src);
+	let stmts = match parser(expr).parse(tokens).into_result() {
 		Ok(s) => s,
 		Err(errs) => return Err(errs.into_iter().map(|err| format!("var:{err:?}\n")).collect()),
 	};

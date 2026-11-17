@@ -17,19 +17,25 @@ pub struct AppStorage {
 	// pub cache: PathBuf,
 }
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct AppSettings {
 	maximize: bool,
 	position: (i32, i32),		// (x, y)
     resolution: (u32, u32),		// (w, h)
+	calc_width: f32,
+	calc_height: f32,
 	saved_input: DocSave,
 	settings: UserSettings
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
 pub struct UserSettings {
 	dark_mode: bool,
 	show_err_msg: bool,
+	show_notes: bool,
+	separate_var: bool,
 	save_on_close: bool,
 	decimal_prec: i32,
 	decimal_separator: String,
@@ -46,21 +52,37 @@ struct DocSave {
 	note: String
 }
 
-impl AppSettings {
-	pub fn init(state: &AppState<'_>) -> Self {
-		let user_settings = state.get_user_settings();
+impl Default for UserSettings {
+	fn default() -> Self {
+		UserSettings {
+			dark_mode: true, 
+			show_err_msg: true, 
+			show_notes: false,
+			separate_var: true,
+			save_on_close: false, 
+			decimal_prec: 3, 
+			decimal_separator: ".".into(), 
+			digit_separator: ",".into(), 
+			font_size: SemanticSize::Lg,
+		}
+	}
+}
 
+impl Default for AppSettings {
+	fn default() -> Self {
 		AppSettings {
-			settings: UserSettings {
-				dark_mode: user_settings.dark_mode.1, 
-				show_err_msg: user_settings.show_err_msg.1, 
-				save_on_close: user_settings.save_on_close.1, 
-				decimal_prec: user_settings.decimal_prec.2.as_str().parse::<i32>().unwrap_or(3), 
-				decimal_separator: user_settings.decimal_separator.2.to_string(), 
-				digit_separator: user_settings.digit_separator.2.to_string(), 
-				font_size: user_settings.font_size.1,
+			maximize: false,
+			position: (640, 320),
+			resolution: (300, 400),
+			calc_width: 200.0,
+			calc_height: 100.0,
+			saved_input: DocSave { 
+				name: "default".into(), 
+				calc: "".into(), 
+				var: "".into(), 
+				note: "".into() 
 			},
-			..Default::default()
+			settings: UserSettings::default(),
 		}
 	}
 }
@@ -99,14 +121,14 @@ impl AppStorage {
 		})
 	}
 
-	pub fn read_settings(path: &PathBuf, state: &AppState<'_>) -> Result<AppSettings, Box<dyn Error>> {
+	pub fn read_settings(path: &PathBuf) -> Result<AppSettings, Box<dyn Error>> {
 		match fs::read_to_string(path) {
-			Ok(content) if content.trim().is_empty() => Ok(AppSettings::init(state)),
+			Ok(content) if content.trim().is_empty() => Ok(AppSettings::default()),
 			Ok(content) => { 
 				let res: AppSettings = toml::from_str(&content)?;
 				Ok(res)
 			},
-			Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(AppSettings::init(state)),
+			Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(AppSettings::default()),
 			Err(e) => Err(e.into()),
 		}
 	}
@@ -116,10 +138,11 @@ impl AppStorage {
 			state, 
 			palette, 
 			theme, 
-			path 
+			path ,
+			..
 		} = helper;
 		
-		let data = AppStorage::read_settings(path, state)?;
+		let data = AppStorage::read_settings(path)?;
 		let mut user_settings = FeUserSettings::new();
 
 		user_settings.dark_mode.1 = data.settings.dark_mode;
@@ -128,7 +151,9 @@ impl AppStorage {
 		user_settings.digit_separator.2 = SharedString::from(data.settings.digit_separator);
 		user_settings.font_size.1 = data.settings.font_size;
 		user_settings.save_on_close.1 = data.settings.save_on_close;
+		user_settings.separate_var.2 = data.settings.separate_var;
 		user_settings.show_err_msg.1 = data.settings.show_err_msg;
+		user_settings.show_notes.2 = data.settings.show_notes;
 
 		state.set_selected_theme(if data.settings.dark_mode { 1 } else { 0 });
 		state.set_palette(theme.get_list().row_data(state.get_selected_theme() as usize)
@@ -152,6 +177,8 @@ impl AppStorage {
 		app_window.set_maximized(data.maximize);
 		app_window.set_position(PhysicalPosition { x: data.position.0, y: data.position.1 });
 		app_window.set_size(PhysicalSize { width: data.resolution.0, height: data.resolution.1 });
+		state.set_calc_width(data.calc_width);
+		state.set_calc_height(data.calc_height);
 
 		Ok(())
 	}
@@ -161,12 +188,16 @@ impl AppStorage {
 		let PhysicalPosition { x, y } = app_window.position();
 		let PhysicalSize { height, width } = app_window.size();
 		let FeUserSettings { save_on_close, .. } = state.get_user_settings();
+		let calc_width = state.get_calc_width();
+		let calc_height = state.get_calc_height();
 		
-		let mut data = AppStorage::read_settings(&self.config.join("settings.toml"), state)?;
+		let mut data = AppStorage::read_settings(&self.config.join("settings.toml"))?;
 
 		data.maximize = app_window.is_maximized();
 		data.position = (x, y);
 		data.resolution = (width, height);
+		data.calc_width = calc_width;
+		data.calc_height = calc_height;
 		data.saved_input = if save_on_close.1 {
 			DocSave { 
 				name: "default".into(), 
@@ -177,7 +208,8 @@ impl AppStorage {
 		} else {
 			DocSave { 
 				name: "default".into(), 
-				..Default::default() }
+				..Default::default() 
+			}
 		};
 
 		let data = toml::to_string(&data)?;
@@ -192,6 +224,8 @@ impl UserSettings {
 		UserSettings {
 			dark_mode: settings.dark_mode.1, 
 			show_err_msg: settings.show_err_msg.1, 
+			show_notes: settings.show_notes.2,
+			separate_var: settings.separate_var.2,
 			save_on_close: settings.save_on_close.1, 
 			decimal_prec: settings.decimal_prec.2.as_str().parse::<i32>().unwrap_or(3), 
 			decimal_separator: settings.decimal_separator.2.to_string(), 
@@ -200,8 +234,8 @@ impl UserSettings {
 		}
 	}
 
-	pub fn save_settings(&self, path: &PathBuf, state: &AppState<'_>) -> Result<(), Box<dyn Error>> {
-		let mut data = AppStorage::read_settings(path, state)?;
+	pub fn save_settings(&self, path: &PathBuf) -> Result<(), Box<dyn Error>> {
+		let mut data = AppStorage::read_settings(path)?;
 
 		data.settings = UserSettings {
 			dark_mode: self.dark_mode,
@@ -210,7 +244,9 @@ impl UserSettings {
 			digit_separator: self.digit_separator.clone(),
 			font_size: self.font_size,
 			save_on_close: self.save_on_close,
-			show_err_msg: self.show_err_msg
+			separate_var: self.separate_var,
+			show_err_msg: self.show_err_msg,
+			show_notes: self.show_notes
 		};
 
 		let data = toml::to_string(&data)?;
