@@ -23,7 +23,7 @@ export component Tabs inherits Rectangle {
 		x: 3px; y: 3px;
 		width: parent.width - 6px;
 		height: parent.height - 6px;
-		border-radius: AppState.palette.radius-field;
+		border-radius: AppState.palette.radius-box;
 		background: ta.has-hover && !is-active ? (AppState.palette.is-dark ? Colors.white : Colors.black).transparentize(0.8) : transparent;
 		
 		animate background {
@@ -92,7 +92,7 @@ export component TabsGroup inherits Rectangle {
 	height: 36px;
 
 	Rectangle {
-		border-radius: AppState.palette.radius-field;
+		border-radius: AppState.palette.radius-box;
 		background: AppState.palette.color-base-200;
 		drop-shadow-color: AppState.palette.color-neutral.transparentize(0.5);
 		drop-shadow-blur: 1px;
@@ -104,7 +104,7 @@ export component TabsGroup inherits Rectangle {
 			width: parent.width / state.tabs.length - 6px;
 			height: parent.height - 6px;
 			background: AppState.palette.color-primary;
-			border-radius: AppState.palette.radius-field;
+			border-radius: AppState.palette.radius-box;
 
 			animate x {
 				duration: 300ms;

@@ -21,6 +21,7 @@ pub struct AppStorage {
 #[serde(default)]
 pub struct AppSettings {
 	maximize: bool,
+	show_menu: bool,
 	position: (i32, i32),		// (x, y)
     resolution: (u32, u32),		// (w, h)
 	calc_width: f32,
@@ -72,6 +73,7 @@ impl Default for AppSettings {
 	fn default() -> Self {
 		AppSettings {
 			maximize: false,
+			show_menu: true,
 			position: (640, 320),
 			resolution: (300, 400),
 			calc_width: 200.0,
@@ -179,6 +181,7 @@ impl AppStorage {
 		app_window.set_size(PhysicalSize { width: data.resolution.0, height: data.resolution.1 });
 		state.set_calc_width(data.calc_width);
 		state.set_calc_height(data.calc_height);
+		state.set_hide_menu(!data.show_menu);
 
 		Ok(())
 	}
@@ -190,10 +193,12 @@ impl AppStorage {
 		let FeUserSettings { save_on_close, .. } = state.get_user_settings();
 		let calc_width = state.get_calc_width();
 		let calc_height = state.get_calc_height();
+		let show_menu = !state.get_hide_menu();
 		
 		let mut data = AppStorage::read_settings(&self.config.join("settings.toml"))?;
 
 		data.maximize = app_window.is_maximized();
+		data.show_menu = show_menu;
 		data.position = (x, y);
 		data.resolution = (width, height);
 		data.calc_width = calc_width;

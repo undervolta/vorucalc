@@ -5,6 +5,7 @@ import { ContextMenu } from "@components/context-menu.slint";
 
 export component FieldInput inherits FocusScope {
 	in-out property <string> text;
+	in property <string> placeholder;
 	in property <brush> bg-color;
 	in property <brush> text-color;
 	in property <length> font-size: Font.base;
@@ -122,6 +123,13 @@ export component FieldInput inherits FocusScope {
 				root.scroll-y = self.content-y;
 				root.on-scroll();
 			}
+		}
+
+		if (root.placeholder != "" && root.text == ""): Text {
+			x: 4px; y: 4px;
+			text: root.placeholder;
+			color: AppState.palette.color-base-content.with-alpha(0.5);
+			font-size: root.font-size;
 		}
 	
 		animate background {

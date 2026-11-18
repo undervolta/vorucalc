@@ -31,9 +31,9 @@ export component AppWindow inherits Window {
 	
 	in-out property <[TabsState]> tabs;
 	in-out property <string> active-tabs: "calc";
+	property <bool> show-err: AppState.user-settings.show-err-msg.value && AppState.error-msg != "";
 
 	scope := FocusScope {
-		// fields
 		VerticalBox {
 			property <length> font-size: AppState.user-settings.font-size.value == SemanticSize.xs ? Font.xs
 									: AppState.user-settings.font-size.value == SemanticSize.sm ? Font.sm
@@ -42,15 +42,13 @@ export component AppWindow inherits Window {
 									: AppState.user-settings.font-size.value == SemanticSize.xl ? Font.xl
 									: AppState.user-settings.font-size.value == SemanticSize.xxl ? Font.x2l : Font.base;
 			
-			padding-bottom: AppState.user-settings.show-err-msg.value && AppState.error-msg != "" ? 90px : 50px;
-
 			if (active-tabs == "calc"): calc := CalcDiff {
 				font-size: parent.font-size;
-				// input-len: parent.width / 2;
 			}
 			if (active-tabs == "var"): var := FieldInput {
 				font-size: parent.font-size;
 				text <=> AppState.var;
+				placeholder: "abc = 10";
 				move-to-last-on-init: true;
 				edited => {
 					AppLogic.parse-calc();
@@ -62,66 +60,44 @@ export component AppWindow inherits Window {
 			if (active-tabs == "note"): note := FieldInput {
 				font-size: parent.font-size;
 				text <=> AppState.note;
+				placeholder: "Your note here...";
 				move-to-last-on-init: true;
 				on-init => {
 					self.focus();
 				}
 			}
-		}
 
-		VerticalBox {
-			alignment: end;
-			spacing: 40px;
-			z: 2;
+			// toast (error message)
+			if (root.show-err): Rectangle {
+				vertical-stretch: 0;
 
-			// toast
-			if (AppState.user-settings.show-err-msg.value): Rectangle {
-				VerticalLayout {
-					padding: 0px;
-
-					Toast {
-						text <=> AppState.error-msg;
-						variant: "error";
-					}
-	
-					states [
-						show when AppState.error-msg != "": {
-							y: 0px;
-							opacity: 1;
-	
-							in {
-								animate y, opacity {
-									duration: 300ms;
-									easing: ease-out-quint;
-								}
-							}
-						}
-						hide when AppState.error-msg == "": {
-							y: 10px;
-							opacity: 0;
-						}
-					]
+				Toast {
+					text <=> AppState.error-msg;
+					variant: "error";
 				}
 			}
 
-			// tabs + settings
-			HorizontalLayout {
-				spacing: 4px;
+			if (!AppState.hide-menu): Rectangle {
+				vertical-stretch: 0;
 
-				TabsGroup {
-					id: "main-nav";
-					state: tabs[0];
-				}
-				ButtonTrigger {
-					bg-color: AppState.palette.color-base-200.darker(0.1);
-					color: AppState.palette.color-base-content;
-					height: 36px; width: 36px; padding-x: 0px;
-					icon: @image-url("icons/cog.svg");
-					on-click => {
-						settings.show();
+				HorizontalLayout {
+					spacing: 4px;
+	
+					TabsGroup {
+						id: "main-nav";
+						state: tabs[0];
+					}
+					ButtonTrigger {
+						bg-color: AppState.palette.color-base-200;
+						color: AppState.palette.color-base-content;
+						height: 36px; width: 36px; padding-x: 0px;
+						icon: @image-url("icons/cog.svg");
+						on-click => {
+							settings.show();
+						}
 					}
 				}
-			}
+			} 
 		}
 		
 		// shortcuts
@@ -151,6 +127,12 @@ export component AppWindow inherits Window {
 			keys: @keys(Control + ",");
 			activated => {
 				settings.show();
+			}
+		}
+		KeyBinding {
+			keys: @keys(F10);
+			activated => {
+				AppState.hide-menu = !AppState.hide-menu;
 			}
 		}
 

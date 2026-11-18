@@ -4,20 +4,23 @@ import { Font } from "@styles";
 
 export component CalcDiff inherits FocusScope {
 	in property <length> font-size;
+	property <length> vert-bar-height: 8px;
 	
 	forward-focus: input;
 
-	VerticalLayout {
-		padding: 0px;
-
+	Rectangle {
 		main := Rectangle {
+			x: 0px; y: 0px;
 			opacity: root.enabled ? 1 : 0;
+			height: AppState.user-settings.separate-var.value 
+				? parent.height : clamp(AppState.calc-height, 64px, max(64px, parent.height - 72px));
 	
 			input := FieldInput {
 				x: 0;
 				width: clamp(AppState.calc-width, 100px, max(100px, parent.width - 108px));
 				font-size: root.font-size;
 				text <=> AppState.calc-input;
+				placeholder: "10 + 6";
 				enabled: root.enabled;
 				move-to-last-on-init: true;
 	
@@ -33,7 +36,7 @@ export component CalcDiff inherits FocusScope {
 				width: 8px;
 				opacity: root.enabled ? 1 : 0;
 	
-				ta := TouchArea {
+				TouchArea {
 					mouse-cursor: ew-resize;
 					enabled: root.enabled;
 	
@@ -65,9 +68,23 @@ export component CalcDiff inherits FocusScope {
 		}
 
 		if (!AppState.user-settings.separate-var.value): vert-bar := Rectangle {
-			height: 8px;
+			y: main.height;
+			height: root.vert-bar-height;
 			opacity: root.enabled ? 1 : 0;
-			// background: red;
+
+			TouchArea {
+				mouse-cursor: ns-resize;
+				enabled: root.enabled;
+
+				moved => {
+					if (self.pressed) {
+						AppState.calc-height = max(64px, min(
+							root.height - root.vert-bar-height - 64px,
+							AppState.calc-height + self.mouse-y - self.pressed-y
+						));
+					}
+				}
+			}
 
 			if (root.enabled): Image {
 				source: @image-url("../icons/vertical-dots.svg");
@@ -77,9 +94,10 @@ export component CalcDiff inherits FocusScope {
 		}
 
 		if (!AppState.user-settings.separate-var.value): var-list := FieldInput {
-			// y: bar.x + bar.width;
-			// height: max(parent.width - self.x, 0px);
+			y: main.height + root.vert-bar-height;
+			height: max(parent.height - self.y, 0px);
 			text <=> AppState.var;
+			placeholder: "abc = 10";
 			font-size: root.font-size;
 			enabled: root.enabled;
 			edited => { AppLogic.parse-calc(); }

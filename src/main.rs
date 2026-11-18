@@ -197,8 +197,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 		}
 	});
 
-	
-	
 	// save settings
 	let app_handle = app.as_weak();
 	let state_handle = state.as_weak();
