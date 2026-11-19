@@ -7,11 +7,12 @@ import { FieldInput } from "@components/text-edit.slint";
 import { Toast } from "@components/toast.slint";
 import { CalcDiff } from "@components/calc-diff.slint";
 import { SettingsModal } from "@components/settings-modal.slint";
+import { ShortcutModal, HelpModal } from "@components/help-modal.slint";
 
 import "./fonts/poppins.medium.ttf";
 import "./fonts/poppins.semibold.ttf";
 
-export { AppState, AppLogic } from "@stores/app.slint";
+export { AppState, AppLogic, AppData } from "@stores/app.slint";
 export { Palette } from "std-widgets.slint";
 export { Theme } from "@styles";
 
@@ -130,14 +131,40 @@ export component AppWindow inherits Window {
 			}
 		}
 		KeyBinding {
+			keys: @keys(Control + "/");
+			activated => {
+				shortcut.show();
+			}
+		}
+		KeyBinding {
+			keys: @keys(F1);
+			activated => {
+				help.show();
+			}
+		}
+		KeyBinding {
 			keys: @keys(F10);
 			activated => {
 				AppState.hide-menu = !AppState.hide-menu;
 			}
 		}
+		KeyBinding {
+			keys: @keys(F11);
+			activated => {
+				root.full-screen = !root.full-screen;
+			}
+		}
 
 		// modals
 		settings := SettingsModal {
+			dialog-width: root.width;
+			dialog-height: root.height;
+		}
+		shortcut := ShortcutModal {
+			dialog-width: root.width;
+			dialog-height: root.height;
+		}
+		help := HelpModal {
 			dialog-width: root.width;
 			dialog-height: root.height;
 		}

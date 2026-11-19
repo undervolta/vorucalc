@@ -104,7 +104,7 @@ pub enum Token {
 	// identifiers
 	#[regex(r"[a-zA-Z_][a-zA-Z0-9_]*", |lex| lex.slice().to_owned())]
 	Identifier(String),
-	
+
 	Error
 }
 
@@ -289,9 +289,9 @@ fn apply(l: Value, op: BinOp, r: Value) -> Option<Value> {
 			BinOp::Exp => a.checked_pow(b as u32).map(Value::Int),
 		},
 
-		(Value::Invalid, Value::Int(_)) | 
+		(Value::Invalid, Value::Int(_)) |
 		(Value::Int(_), Value::Invalid) |
-		(Value::Invalid, Value::Float(_)) | 
+		(Value::Invalid, Value::Float(_)) |
 		(Value::Float(_), Value::Invalid) => None,
 
 		_ => {
@@ -512,12 +512,12 @@ pub fn eval(e: &Expr, env: &HashMap<String, Value>) -> Option<Value> {
 								_ => None
 							},
 							MathFunction::Log10 => match eval(first, env)? {
-								Value::Int(n) => Some(Value::Int(n.ilog10().into())),
+								Value::Int(n) => Some(Value::Float((n as f64).log10())),
 								Value::Float(f) => Some(Value::Float(f.log10())),
 								_ => None
 							},
 							MathFunction::Log2 => match eval(first, env)? {
-								Value::Int(n) => Some(Value::Int(n.ilog10().into())),
+								Value::Int(n) => Some(Value::Int(n.ilog2().into())),
 								Value::Float(f) => Some(Value::Float(f.log2())),
 								_ => None
 							},
@@ -615,7 +615,7 @@ pub fn eval(e: &Expr, env: &HashMap<String, Value>) -> Option<Value> {
 				},
 				_ => None
 			}
-		}, 
+		},
 		Expr::Sqrt(inner) => eval(&Expr::Function(MathFunction::Sqrt, vec![*inner.to_owned()]), env),
 		Expr::Bin(l, op, r) => apply(eval(l, env)?, *op, eval(r, env)?),
 	}

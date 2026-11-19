@@ -58,6 +58,18 @@ export struct SettingsOption {
 	input-type: int,		// 1 = switch, 2 = input, 3 = dropdown (SemanticSize)
 }
 
+export struct StringPair {
+	key: string,
+	value: string
+}
+
+export struct HelpPair {
+	label: string,
+	value: string,
+	example: string,
+	is-header: bool
+}
+
 export global AppState {
 	in-out property <int> selected-theme: 1;	// index
 	in-out property <ThemePalette> palette: Theme.list[selected-theme];
@@ -75,8 +87,24 @@ export global AppState {
 
 export global AppLogic {
 	pure callback load-image(string) -> image;			// (path)
-	callback refresh-tab(string);
+	callback refresh-tab(string);						// (id)
 	callback select-tab(string, int);					// (id, selected)
 	callback parse-calc();
 	callback save-settings([SettingsOption]);
+}
+
+export global AppData {
+	out property <[SettingsOption]> settings: [
+		{ type: DarkMode, input-type: 1, label: AppState.user-settings.dark-mode.title, desc: "", checked: AppState.user-settings.dark-mode.value },
+		{ type: ShowErrMessage, input-type: 1, label: AppState.user-settings.show-err-msg.title, checked: AppState.user-settings.show-err-msg.value },
+		{ type: ShowNotes, input-type: 1, label: AppState.user-settings.show-notes.title, desc: AppState.user-settings.show-notes.desc, checked: AppState.user-settings.show-notes.value },
+		{ type: SeparateVariable, input-type: 1, label: AppState.user-settings.separate-var.title, desc: AppState.user-settings.separate-var.desc, checked: AppState.user-settings.separate-var.value },
+		{ type: SaveOnClose, input-type: 1, label: AppState.user-settings.save-on-close.title, checked: AppState.user-settings.save-on-close.value },
+		{ type: DecimalPrecision, input-type: 3, label: AppState.user-settings.decimal-prec.title, desc: AppState.user-settings.decimal-prec.desc, text: AppState.user-settings.decimal-prec.value },
+		{ type: DecimalSeparator, input-type: 2, label: AppState.user-settings.decimal-separator.title, desc: AppState.user-settings.decimal-separator.desc, text: AppState.user-settings.decimal-separator.value },
+		{ type: DigitSeparator, input-type: 2, label: AppState.user-settings.digit-separator.title, desc: AppState.user-settings.digit-separator.desc, text: AppState.user-settings.digit-separator.value },
+		{ type: FontSize, input-type: 4, label: AppState.user-settings.font-size.title, size: AppState.user-settings.font-size.value },
+	];
+	in property <[StringPair]> shortcut-list;
+	in property <[HelpPair]> help-list;
 }

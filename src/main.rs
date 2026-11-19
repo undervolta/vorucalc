@@ -21,6 +21,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let app = AppWindow::new()?;
 	let state = app.global::<AppState>();
 	let logic = app.global::<AppLogic>();
+	let data = app.global::<AppData>();
 
 	let storage = storage::AppStorage::new(stores::APP_NAME)?;
 
@@ -30,8 +31,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 	if let Some(palette) = palette_handle.upgrade() {
 		if let Some(theme) = theme_handle.upgrade() {
 			if let Err(e) = storage::AppStorage::load_settings(&app, stores::app::SaveSettingsHelper {
-				state: &state, 
-				palette: &palette, 
+				state: &state,
+				palette: &palette,
 				theme: &theme,
 				path: &storage.config.join("settings.toml"),
 				logic: None
@@ -42,8 +43,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 	}
 
 	let tabs = components::tabs::get_app_tabs(&state);
-	// state.set_user_settings(stores::app::get_user_settings());
 	app.set_tabs(tabs.clone());
+
+	components::help::set_shortcut_list(&data);
+	components::help::set_help_list(&data);
 
 	let app_handle = app.as_weak();
 	let state_handle = state.as_weak();
@@ -61,7 +64,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 			}
 		}
 	});
-	
+
 	let app_handle = app.as_weak();
 	logic.on_load_image(move |path| {
 		if let Some(_) = app_handle.upgrade() {
@@ -100,9 +103,9 @@ fn main() -> Result<(), Box<dyn Error>> {
 				if let Some(palette) = palette_handle.upgrade() {
 					if let Some(theme) = theme_handle.upgrade() {
 						stores::app::save_user_settings(&current_settings, stores::app::SaveSettingsHelper {
-							state: &app_state, 
+							state: &app_state,
 							logic: Some(&app_logic),
-							palette: &palette, 
+							palette: &palette,
 							theme: &theme,
 							path: &settings_path
 						});
@@ -111,7 +114,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 			}
 		}
 	});
-	
+
 	let state_handle = state.as_weak();
 	logic.on_parse_calc(move || {
 		if let Some(app_state) = state_handle.upgrade() {
@@ -131,7 +134,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 
 						let err_lines = lines.into_iter().enumerate().fold(String::new(), |mut acc, (idx, line)| {
 							if line.contains("?") {
-								if idx < lines_len - 1 { 
+								if idx < lines_len - 1 {
 									acc.push_str(&format!("{}, ", &(idx + 1).to_string())[..]);
 								}
 								else {
@@ -142,17 +145,17 @@ fn main() -> Result<(), Box<dyn Error>> {
 							acc
 						});
 
-						app_state.set_error_msg(SharedString::from(format!("Unknown variable(s) at {} {}.", 
+						app_state.set_error_msg(SharedString::from(format!("Unknown variable(s) at {} {}.",
 							if err_lines.contains(",") { "lines" } else { "line" },
 							err_lines
 						)));
 					}
 
 					res
-				}, 
+				},
 				Err(err) => {
 					let re = Regex::new(r"\d+\.\.\d+").unwrap();
-					
+
 					if let Some(mat) = re.find(&err.to_string()) {
 						if let &[first, .., last] = &mat.as_str().split("..").collect::<Vec<&str>>()[..] {
 							let first_pos = first.parse::<usize>().unwrap_or(0);
@@ -162,7 +165,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 							let is_calc_input = err.starts_with("calc");
 							let input_err = if is_calc_input { app_state.get_calc_input() } else { app_state.get_var() }
 								.replace(" ", "").replace("\t", "");
-							
+
 							let get_line = | search_pos: usize | -> i32 {
 								let mut line = 1;
 
@@ -180,8 +183,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 							if !is_same_pos {
 								last_line = get_line(last_pos);
 							}
-							
-							app_state.set_error_msg(SharedString::from(format!("{} error at {} {}.", 
+
+							app_state.set_error_msg(SharedString::from(format!("{} error at {} {}.",
 								if is_calc_input { "Calculation" } else { "Variable" },
 								if is_same_pos { "line" } else { "lines" },
 								if is_same_pos { first_line.to_string() } else { format!("{} - {}", first_line, last_line) }
@@ -208,11 +211,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 				}
 			}
 		}
-		
+
 		slint::CloseRequestResponse::HideWindow
 	});
 
 	app.run()?;
-
 	Ok(())
 }

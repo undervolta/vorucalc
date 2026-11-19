@@ -1,0 +1,107 @@
+import { AppState, AppData, HelpPair, StringPair } from "@stores/app.slint";
+import { Font } from "@styles";
+import { Modal } from "@components/modal.slint";
+import { ListView } from "std-widgets.slint";
+
+export component ShortcutModal inherits Modal {
+	in property <length> dialog-width;
+	in property <length> dialog-height;
+	in property <[StringPair]> list: AppData.shortcut-list;
+
+	title: "Keyboard Shortcut";
+	width: dialog-width;
+	height: dialog-height;
+	size: "custom";
+	modal-width-custom: 288px;
+	modal-height-custom: 320px;
+
+	VerticalLayout {
+		padding: 16px; padding-right: 0px;
+		spacing: 4px;
+
+		ListView {
+			for shortcut in list: HorizontalLayout {
+				spacing: 16px;
+				padding-right: 20px; padding-top: 4px; padding-bottom: 4px;
+				alignment: space-between;
+				cross-axis-alignment: center;
+	
+				Text {
+					text: shortcut.key;
+					horizontal-alignment: left;
+					color: AppState.palette.color-base-content;
+					wrap: word-wrap;
+				}
+				
+				Text {
+					text: shortcut.value;
+					horizontal-alignment: right;
+					wrap: word-wrap;
+					color: AppState.palette.color-base-content.with-alpha(0.5);
+				}
+			}
+		}
+	}
+}  
+
+component Label inherits Text {
+	horizontal-stretch: 0;
+	horizontal-alignment: left;
+	vertical-alignment: center;
+	color: AppState.palette.color-base-content;
+	wrap: word-wrap;
+}
+
+export component HelpModal inherits Modal {
+	in property <length> dialog-width;
+	in property <length> dialog-height;
+	in property <[HelpPair]> list: AppData.help-list;
+
+	title: "Help";
+	width: dialog-width;
+	height: dialog-height;
+	size: "custom";
+	modal-width-custom: 640px;
+	modal-height-custom: 480px;
+
+	VerticalLayout {
+		padding: 16px; padding-right: 0px;
+		spacing: 4px;
+
+		ListView {
+			for item[idx] in list: HorizontalLayout {
+				spacing: 16px;
+				padding-right: 20px; padding-top: 4px; padding-bottom: 4px;
+				alignment: space-between;
+				cross-axis-alignment: center;
+				
+				if item.is-header: VerticalLayout {
+					padding: 0px; padding-top: idx > 0 ? 12px : 0px;
+					
+					Text {
+						text: item.label;
+						horizontal-alignment: left;
+						vertical-alignment: center;
+						font-weight: Font.semibold;
+						color: AppState.palette.color-base-content;
+						wrap: word-wrap;
+					}
+				}
+
+				if !item.is-header: Label {
+					width: 20%;
+					text: item.label;
+				}
+				if !item.is-header: Label {
+					width: 50%;
+					text: item.value;
+				}
+				if !item.is-header: Label {
+					width: 30%;
+					text: item.example;
+					color: AppState.palette.color-base-content.with-alpha(0.5);
+				}
+			}
+		}
+	}
+}

@@ -1,4 +1,7 @@
-import { AppState, AppLogic, SemanticSize, SettingsOption, UserSettingType } from "@stores/app.slint";
+import { 
+	AppState, AppLogic, AppData, 
+	SemanticSize, SettingsOption, UserSettingType 
+} from "@stores/app.slint";
 import { Modal } from "@components/modal.slint";
 import { Switch } from "@components/switch.slint";
 import { LineInput } from "@components/line-edit.slint";
@@ -88,17 +91,7 @@ component UnsavedModal inherits Modal {
 export component SettingsModal inherits Modal {
 	in property <length> dialog-width;
 	in property <length> dialog-height;
-	in-out property <[SettingsOption]> settings: [
-		{ type: DarkMode, input-type: 1, label: AppState.user-settings.dark-mode.title, desc: "", checked: AppState.user-settings.dark-mode.value },
-		{ type: ShowErrMessage, input-type: 1, label: AppState.user-settings.show-err-msg.title, checked: AppState.user-settings.show-err-msg.value },
-		{ type: ShowNotes, input-type: 1, label: AppState.user-settings.show-notes.title, desc: AppState.user-settings.show-notes.desc, checked: AppState.user-settings.show-notes.value },
-		{ type: SeparateVariable, input-type: 1, label: AppState.user-settings.separate-var.title, desc: AppState.user-settings.separate-var.desc, checked: AppState.user-settings.separate-var.value },
-		{ type: SaveOnClose, input-type: 1, label: AppState.user-settings.save-on-close.title, checked: AppState.user-settings.save-on-close.value },
-		{ type: DecimalPrecision, input-type: 3, label: AppState.user-settings.decimal-prec.title, desc: AppState.user-settings.decimal-prec.desc, text: AppState.user-settings.decimal-prec.value },
-		{ type: DecimalSeparator, input-type: 2, label: AppState.user-settings.decimal-separator.title, desc: AppState.user-settings.decimal-separator.desc, text: AppState.user-settings.decimal-separator.value },
-		{ type: DigitSeparator, input-type: 2, label: AppState.user-settings.digit-separator.title, desc: AppState.user-settings.digit-separator.desc, text: AppState.user-settings.digit-separator.value },
-		{ type: FontSize, input-type: 4, label: AppState.user-settings.font-size.title, size: AppState.user-settings.font-size.value },
-	];
+	in-out property <[SettingsOption]> settings: AppData.settings;
 
 	function set-settings-toggle(index: int) {
 		settings[index].checked = !settings[index].checked;
@@ -166,7 +159,7 @@ export component SettingsModal inherits Modal {
 		ListView {
 			for option[idx] in settings: HorizontalLayout {
 				spacing: 16px;
-				padding-right: 16px; padding-top: 4px; padding-bottom: 4px;
+				padding-right: 20px; padding-top: 4px; padding-bottom: 4px;
 				cross-axis-alignment: center;
 	
 				Label { 
