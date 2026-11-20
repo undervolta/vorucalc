@@ -14,6 +14,7 @@ export component Tabs inherits Rectangle {
 	in property <image> icon;
 	in-out property <bool> is-active;
 	in property <length> pref-width;
+	in property <bool> show-label;
 
 	y: ta.pressed ? 2px : 0px;
 	min-width: pref-width;
@@ -48,7 +49,7 @@ export component Tabs inherits Rectangle {
 			}
 		}
 	
-		if (AppState.screen-width > 450px): VerticalLayout {
+		if (root.show-label): VerticalLayout {
 			padding-top: 1px;
 
 			Text {
@@ -71,7 +72,7 @@ export component Tabs inherits Rectangle {
 		}
 	}
 
-	if (AppState.screen-width <= 450px): TooltipUp {
+	if (!show-label): TooltipUp {
 		text: label;
 		target-x: parent.width / 2;
 		target-y: parent.y - parent.height - 10px;
@@ -87,11 +88,14 @@ export component Tabs inherits Rectangle {
 export component TabsGroup inherits Rectangle {
 	in property <string> id;
 	in-out property <TabsState> state;
+	in property <length> width-limit;
+	in property <length> show-label-length;
+	property <bool> show-items-label: width-limit / state.tabs.length >= show-label-length;
 	// in property <string> size: "md";
 
 	height: 36px;
 
-	Rectangle {
+	main := Rectangle {
 		border-radius: AppState.palette.radius-box;
 		background: AppState.palette.color-base-200;
 		drop-shadow-color: AppState.palette.color-neutral.transparentize(0.5);
@@ -120,6 +124,7 @@ export component TabsGroup inherits Rectangle {
 				icon: AppLogic.load-image(tab.icon);
 				is-active: state.selected - 1 == idx;
 				pref-width: tab.width;
+				show-label: root.show-items-label;
 			}
 		}
 

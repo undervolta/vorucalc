@@ -517,7 +517,7 @@ pub fn eval(e: &Expr, env: &HashMap<String, Value>) -> Option<Value> {
 								_ => None
 							},
 							MathFunction::Log2 => match eval(first, env)? {
-								Value::Int(n) => Some(Value::Int(n.ilog2().into())),
+								Value::Int(n) => Some(Value::Float((n as f64).log2())),
 								Value::Float(f) => Some(Value::Float(f.log2())),
 								_ => None
 							},
