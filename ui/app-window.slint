@@ -18,7 +18,7 @@ export { Theme } from "@styles";
 
 export component AppWindow inherits Window {
 	title: "VoruCalc";
-	// icon: @image-url("assets/icon.png");
+	icon: @image-url("../assets/vorucalc-icon-256px.png");
 	background: AppState.palette.color-base-300;
 	// no-frame: true;
 	// resize-border-width: 2px;
@@ -78,6 +78,7 @@ export component AppWindow inherits Window {
 				}
 			}
 
+			// menu tabs
 			if (!AppState.hide-menu): Rectangle {
 				vertical-stretch: 0;
 
@@ -87,6 +88,8 @@ export component AppWindow inherits Window {
 					TabsGroup {
 						id: "main-nav";
 						state: tabs[0];
+						show-label-length: 120px;
+						width-limit: AppState.screen-width - 48px;
 					}
 					ButtonTrigger {
 						bg-color: AppState.palette.color-base-200;
