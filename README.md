@@ -1,10 +1,30 @@
 # VoruCalc
 
-![Banner](./assets/banner.webp)
+<p align="center">
+	<img src="./assets/banner.webp" alt="VoruCalc Banner">
+</p>
+
+<p align="center">
+	<a href="https://github.com/undervolta/vorucalc/releases"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/undervolta/vorucalc/release.svg?theme=zinc&amp;split=true&amp;mode=dark"><img alt="Releases" src="https://shieldcn.dev/github/undervolta/vorucalc/release.svg?theme=zinc&amp;split=true&amp;mode=light"></picture></a>
+	<!-- <a href="https://">
+		<picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Documentation.svg?theme=slate&amp;logo=ri%3APiBookFill&amp;mode=dark"><img alt="Documentation" src="https://shieldcn.dev/badge/Documentation.svg?theme=slate&amp;logo=ri%3APiBookFill&amp;mode=light"></picture>
+	</a> -->
+	<a href="https://github.com/undervolta/vorucalc"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/undervolta/vorucalc/license.svg?theme=cyan&amp;split=true&amp;mode=dark"><img alt="License" src="https://shieldcn.dev/github/undervolta/vorucalc/license.svg?theme=cyan&amp;split=true&amp;mode=light"></picture></a>
+	<a href="https://github.com/undervolta/vorucalc/releases"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/undervolta/vorucalc/downloads.svg?theme=violet&amp;split=true&amp;mode=dark"><img alt="Download Count" src="https://shieldcn.dev/github/undervolta/vorucalc/downloads.svg?theme=violet&amp;split=true&amp;mode=light"></picture></a>
+	<!-- <br>
+	<a href="https://github.com/undervolta/vorucalc/releases">
+		<picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Download.svg?theme=blue&amp;logo=ri%3AFaWindows&amp;mode=dark"><img alt="Windows" src="https://shieldcn.dev/badge/Download.svg?theme=blue&amp;logo=ri%3AFaWindows&amp;mode=light"></picture>
+	</a> -->
+	<!-- <a href="https://github.com/undervolta/vorucalc/releases">
+		<picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Download.svg?theme=amber&amp;logo=linux&amp;mode=dark"><img alt="Linux" src="https://shieldcn.dev/badge/Download.svg?theme=amber&amp;logo=linux&amp;mode=light"></picture>
+	</a> -->
+</p>
 
 VoruCalc is a notepad-style calculator. Type one expression per line and the result appears next to it. You can define variables and use them in your calculations.
 
-![Preview](./assets/preview.gif)
+<p align="center">
+	<img src="./assets/preview.gif" alt="VoruCalc Preview">
+</p>
 
 ## Features
 
@@ -30,7 +50,7 @@ VoruCalc is a notepad-style calculator. Type one expression per line and the res
 ```sh
 git clone https://github.com/undervolta/vorucalc.git
 cd vorucalc
-cargo run --release
+cargo run
 ```
 
 To only build the binary:

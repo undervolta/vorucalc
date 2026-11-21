@@ -17,6 +17,7 @@ toml = "1.2.1"
 
 [build-dependencies]
 slint-build = "1.18.1"
+winresource = "0.1.34"
 
 [build]
 rustflags = ["-Z", "threads=8"]
@@ -28,3 +29,10 @@ debug = "line-tables-only"
 [profile.release]
 codegen-units = 1
 lto = true
+
+[package.metadata.generate-rpm]
+assets = [
+    { source = "target/release/vorucalc", dest = "/usr/bin/vorucalc", mode = "755" },
+    { source = "packaging/vorucalc.desktop", dest = "/usr/share/applications/vorucalc.desktop", mode = "644" },
+    { source = "assets/icons/256px/vorucalc.png", dest = "/usr/share/icons/hicolor/256x256/apps/vorucalc.png", mode = "644" },
+]
