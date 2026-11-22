@@ -121,7 +121,10 @@ export component TabsGroup inherits Rectangle {
 				id: idx;
 				parent_id: id;
 				label: tab.label;
-				icon: AppLogic.load-image(tab.icon);
+				icon: tab.icon == "calc" ? @image-url("../icons/calc.svg")
+					: tab.icon == "var" ? @image-url("../icons/var.svg")
+					: @image-url("../icons/notebook.svg");
+				// icon: AppLogic.load-image(tab.icon);
 				is-active: state.selected - 1 == idx;
 				pref-width: tab.width;
 				show-label: root.show-items-label;

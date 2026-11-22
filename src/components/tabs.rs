@@ -12,7 +12,7 @@ pub fn get_app_tabs(state: &AppState<'_>) -> ModelRc<TabsState> {
 		TabsType {
 			name: "calc".into(),
 			label: "Calculate".into(),
-			icon: "calc.svg".into(),
+			icon: "calc".into(),
 			is_active: true,
 			width: 0.0
 		},
@@ -22,7 +22,7 @@ pub fn get_app_tabs(state: &AppState<'_>) -> ModelRc<TabsState> {
 		tabs.push(TabsType {
 			name: "var".into(),
 			label: "Variables".into(),
-			icon: "var.svg".into(),
+			icon: "var".into(),
 			is_active: false,
 			width: 0.0
 		});
@@ -32,7 +32,7 @@ pub fn get_app_tabs(state: &AppState<'_>) -> ModelRc<TabsState> {
 		tabs.push(TabsType {
 			name: "note".into(),
 			label: "Notes".into(),
-			icon: "notebook.svg".into(),
+			icon: "notebook".into(),
 			is_active: false,
 			width: 0.0
 		});

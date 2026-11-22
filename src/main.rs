@@ -1,11 +1,9 @@
 // Prevent console window in addition to Slint window in Windows release builds when, e.g., starting the app via file manager. Ignored on other platforms.
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use std::{
-	error::Error, path::PathBuf
-};
+use std::{ error::Error };
 use regex::Regex;
-use slint::{ Image, Model, SharedString };
+use slint::{ Model, SharedString };
 
 slint::include_modules!();
 
@@ -65,19 +63,13 @@ fn main() -> Result<(), Box<dyn Error>> {
 		}
 	});
 
-	let app_handle = app.as_weak();
-	logic.on_load_image(move |path| {
-		if let Some(_) = app_handle.upgrade() {
-			let manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
-			let img_path = &manifest_dir.join("ui/icons").join(path.as_str());
-
-			Image::load_from_path(img_path)
-				.unwrap_or_else(|_| Image::default())
-		}
-		else {
-			Image::default()
-		}
-	});
+	// let icon_list = components::icons::get_icon_list();
+	// logic.on_load_image(move |name| {
+	// 	match icon_list.get(name.as_str()) {
+	// 		Some(icon) => icon.clone(),
+	// 		None => Image::default()
+	// 	}
+	// });
 
 	let app_handle = app.as_weak();
 	logic.on_select_tab(move |id, selected| {
