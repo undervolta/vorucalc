@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=VoruCalc
+Comment=A lightweight text-based calculator
+Exec=vorucalc
+Icon=vorucalc
+Terminal=false
+Type=Application
+Categories=Utility;

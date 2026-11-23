@@ -21,6 +21,10 @@ fn main() -> Result<(), Box<dyn Error>> {
 	let logic = app.global::<AppLogic>();
 	let data = app.global::<AppData>();
 
+	if let Err(err) = slint::set_xdg_app_id("vorucalc") {
+		eprintln!("Error: {err}");
+	};
+
 	let storage = storage::AppStorage::new(stores::APP_NAME)?;
 
 	// load settings
@@ -62,14 +66,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 			}
 		}
 	});
-
-	// let icon_list = components::icons::get_icon_list();
-	// logic.on_load_image(move |name| {
-	// 	match icon_list.get(name.as_str()) {
-	// 		Some(icon) => icon.clone(),
-	// 		None => Image::default()
-	// 	}
-	// });
 
 	let app_handle = app.as_weak();
 	logic.on_select_tab(move |id, selected| {
@@ -199,7 +195,7 @@ fn main() -> Result<(), Box<dyn Error>> {
 		if let Some(window) = app_handle.upgrade() {
 			if let Some(state) = state_handle.upgrade() {
 				if let Err(err) = storage.save_settings(&window, &state) {
-					eprintln!("Error saving config: {err}");
+					eprintln!("Error: {err}");
 				}
 			}
 		}

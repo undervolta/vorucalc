@@ -10,7 +10,7 @@
 		<picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Documentation.svg?theme=slate&amp;logo=ri%3APiBookFill&amp;mode=dark"><img alt="Documentation" src="https://shieldcn.dev/badge/Documentation.svg?theme=slate&amp;logo=ri%3APiBookFill&amp;mode=light"></picture>
 	</a> -->
 	<a href="https://github.com/undervolta/vorucalc"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/undervolta/vorucalc/license.svg?theme=cyan&amp;split=true&amp;mode=dark"><img alt="License" src="https://shieldcn.dev/github/undervolta/vorucalc/license.svg?theme=cyan&amp;split=true&amp;mode=light"></picture></a>
-	<a href="https://github.com/undervolta/vorucalc/releases"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/undervolta/vorucalc/downloads.svg?theme=violet&amp;split=true&amp;mode=dark"><img alt="Download Count" src="https://shieldcn.dev/github/undervolta/vorucalc/downloads.svg?theme=violet&amp;split=true&amp;mode=light"></picture></a>
+	<!-- <a href="https://github.com/undervolta/vorucalc/releases"><picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/github/undervolta/vorucalc/downloads.svg?theme=violet&amp;split=true&amp;mode=dark"><img alt="Download Count" src="https://shieldcn.dev/github/undervolta/vorucalc/downloads.svg?theme=violet&amp;split=true&amp;mode=light"></picture></a> -->
 	<!-- <br>
 	<a href="https://github.com/undervolta/vorucalc/releases">
 		<picture><source media="(prefers-color-scheme: dark)" srcset="https://shieldcn.dev/badge/Download.svg?theme=blue&amp;logo=ri%3AFaWindows&amp;mode=dark"><img alt="Windows" src="https://shieldcn.dev/badge/Download.svg?theme=blue&amp;logo=ri%3AFaWindows&amp;mode=light"></picture>
@@ -39,24 +39,50 @@ VoruCalc is a notepad-style calculator. Type one expression per line and the res
 - **Built-in help window** with an operator, function and shortcut reference.
 - **Settings persistence:** your settings are saved to a `settings.toml` file in the app config directory.
 
-## Getting Started
+## Installation
 
-### Prerequisites
+### Option 1: Download from Releases
 
-- [Rust](https://www.rust-lang.org/learn/get-started) (edition 2024, so a recent stable toolchain) with `cargo`.
+Grab the package for your platform from the [releases page](https://github.com/undervolta/vorucalc/releases):
 
-### Build and Run
+| Platform                  | Package       |
+| ------------------------- | ------------- |
+| Windows                   | `.exe`        |
+| Debian / Ubuntu           | `.deb`        |
+| Fedora / RHEL / openSUSE  | `.rpm`        |
+| Arch Linux                | `.pkg.tar.zst` |
+| Other Linux (portable)    | `.tar.gz`     |
+
+Install examples:
+
+```sh
+# Debian / Ubuntu
+sudo dpkg -i vorucalc_*.deb
+
+# Fedora / RHEL / openSUSE
+sudo rpm -i vorucalc-*.rpm
+
+# Arch Linux
+sudo pacman -U vorucalc-*.pkg.tar.zst
+
+# Portable tarball
+tar -xzf vorucalc-*.tar.gz
+```
+
+### Option 2: Build from Source
+
+**Prerequisites:** [Rust](https://www.rust-lang.org/learn/get-started) (edition 2024, so a recent stable toolchain) with `cargo`.
 
 ```sh
 git clone https://github.com/undervolta/vorucalc.git
 cd vorucalc
-cargo run
+cargo build --release
 ```
 
-To only build the binary:
+The binary will be at `target/release/vorucalc` (`vorucalc.exe` on Windows). To build and run directly:
 
 ```sh
-cargo build --release
+cargo run --release
 ```
 
 ## Usage

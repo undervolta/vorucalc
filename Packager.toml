@@ -1,0 +1,14 @@
+name = "vorucalc"
+productName = "VoruCalc"
+identifier = "com.undervolta.vorucalc"
+version = "0.1.0"
+description = "A lightweight text-based calculator"
+authors = ["Undervolta"]
+licenseFile = "LICENSE"
+formats = ["deb", "pacman"]
+binaries = [
+    { path = "vorucalc", main = true },
+]
+outDir = "target/packages"
+binariesDir = "target/release"
+icons = ["assets/icons/256px/vorucalc.png"]
